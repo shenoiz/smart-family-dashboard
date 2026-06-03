@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<title>Family Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap');
+:root {
+--bg: #0d1117; /* dark navy background */
+--card: #161b22; /* card surfaces */
+--accent: #58a6ff; /* blue highlights */
+--green: #3fb950;
+--yellow: #d29922;
+--text: #e6edf3;
+--muted: #8b949e;
+--border: #30363d;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+background: var(--bg); color: var(--text);
+font-family: 'Outfit', sans-serif;
+height: 100vh; overflow: hidden;
+display: grid;
+grid-template-columns: 1fr 1fr 1fr; /* 3 columns */
+grid-template-rows: auto 1fr; /* top bar + content */
+gap: 14px; padding: 14px;
+}
+/* Top bar spans all 3 columns */
+.topbar {
+grid-column: 1 / -1;
+display: flex; align-items: center; justify-content: space-between;
+padding: 14px 22px;
+background: var(--card); border-radius: 12px;
+border: 1px solid var(--border);
+}
+.clock { font-size: 2.4rem; font-weight: 700; color: var(--accent); }
+.date { font-size: 0.9rem; color: var(--muted); margin-top: 2px; }
+.greeting { font-size: 1.4rem; color: var(--yellow); }
+.weather-badge {
+display: flex; align-items: center; gap: 12px;
+background: #21262d; padding: 10px 18px;
+border-radius: 20px; border: 1px solid var(--border);
+}
+.weather-temp { font-size: 1.6rem; font-weight: 700; }
+.weather-info { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+/* Todo cards */
+.todo-card {
+background: var(--card); border-radius: 12px;
+padding: 16px; border: 1px solid var(--border); overflow-y: auto;
+}
+.card-title {
+font-size: 1.1rem; font-weight: 600; margin-bottom: 12px;
+padding-bottom: 10px; border-bottom: 1px solid var(--border);
+display: flex; align-items: center; gap: 8px;
+}
+.todo-item {
+display: flex; align-items: flex-start; gap: 10px;
+padding: 10px; margin-bottom: 8px;
+border-radius: 8px; background: #21262d;
+animation: fadeIn 0.4s ease;
+}
+.todo-item.done { opacity: 0.4; }
+.todo-item.done .todo-text { text-decoration: line-through; }
+@keyframes fadeIn {
+from { opacity: 0; transform: translateX(-8px); }
+to { opacity: 1; transform: none; }
+}
+/* Photo frame — center column */
+.photo-frame {
+background: var(--card); border-radius: 12px;
+border: 1px solid var(--border); overflow: hidden; position: relative;
+}
+.photo-frame img { width:100%; height:100%; object-fit:cover; transition: opacity 1s ease; }
+/* Good morning overlay */
+.morning-banner {
+display: none; position: fixed; top:50%; left:50%;
+transform: translate(-50%,-50%);
+background: linear-gradient(135deg,#1a2a4a,#0d2137);
+border: 2px solid var(--accent); border-radius: 20px;
+padding: 50px 70px; text-align: center; z-index: 100;
+animation: popIn 0.5s ease;
+}
+.morning-banner h1 { font-size: 3rem; color: var(--yellow); margin-bottom: 12px; }
+@keyframes popIn {
+from { transform: translate(-50%,-50%) scale(0.7); opacity:0; }
+to { transform: translate(-50%,-50%) scale(1); opacity:1; }
+}
+/* New-item pulse dot */
+.pulse { width:9px; height:9px; background:var(--green);
+border-radius:50%; display:inline-block; animation: pulse 1.5s infinite; }
+@keyframes pulse {
+0%,100%{ transform:scale(1); opacity:1; }
+50% { transform:scale(1.7); opacity:0.4; }
+}
+.empty { color:var(--muted); font-size:0.9rem; text-align:center; padding:20px; }
+</style>
+</head>
+<body>
+<!-- TOP BAR: clock + greeting + weather -->
+<div class='topbar'>
+<div>
+<div class='clock' id='clock'>00:00</div>
+<div class='date' id='date'></div>
+</div>
+<div class='greeting' id='greeting'>Good Evening</div>
+<div class='weather-badge'>
+<img id='weather-icon' src='' width='44' height='44' alt=''>
+<div>
+<div class='weather-temp' id='weather-temp'>--</div>
+<div class='weather-info' id='weather-desc'>Loading...</div>
+</div>
+</div>
+</div>
+<!-- LEFT COLUMN: your todo list -->
+<div class='todo-card'>
+<div class='card-title'>
+Your Tasks
+<span class='pulse' id='dot-yours' style='display:none'></span>
+</div>
+<div id='todos-yours'><div class='empty'>No tasks yet</div></div>
+</div>
+<!-- CENTER COLUMN: family photos -->
+<div class='photo-frame'>
+<img id='photo' src='' alt='Family Photo'>
+<div style='position:absolute;bottom:0;left:0;right:0;
+background:linear-gradient(transparent,rgba(0,0,0,0.6));
+padding:16px;font-size:0.85rem;color:#ccc'>
+Family Memories
+</div>
+</div>
+<!-- RIGHT COLUMN: wife todo list -->
+<div class='todo-card'>
+<div class='card-title'>
+Wife's Tasks
+<span class='pulse' id='dot-wife' style='display:none'></span>
+</div>
+<div id='todos-wife'><div class='empty'>No tasks yet</div></div>
+</div>
+<!-- GOOD MORNING BANNER -->
+<div class='morning-banner' id='morning-banner'>
+<h1>Good Morning!</h1>
+<p id='morning-weather' style='color:#aaa;font-size:0.9rem'></p>
+</div>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js'></script>
+<script>
+const socket = io();
+let photos = [], photoIdx = 0;
+let prevCounts = { yours: 0, wife: 0 };
+// ■■ Clock & greeting ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+function updateClock() {
+const now = new Date();
+document.getElementById('clock').textContent =
+now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+document.getElementById('date').textContent =
+now.toLocaleDateString([], { weekday:'long', month:'long', day:'numeric' });
+const h = now.getHours();
+document.getElementById('greeting').textContent =
+h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
+if (h === 7 && now.getMinutes() === 5 && now.getSeconds() < 10) showMorningBanner();
+}
+setInterval(updateClock, 1000);
+updateClock();
+// ■■ Weather ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+async function loadWeather() {
+const r = await fetch('/api/weather');
+const d = await r.json();
+document.getElementById('weather-temp').textContent = d.temp + String.fromCharCode(176);
+document.getElementById('weather-desc').textContent = d.description;
+document.getElementById('weather-icon').src =
+'https://openweathermap.org/img/wn/' + d.icon + '@2x.png';
+document.getElementById('morning-weather').textContent =
+d.temp + String.fromCharCode(176) + ' - ' + d.description;
+}
+loadWeather();
+setInterval(loadWeather, 30 * 60 * 1000);
+// ■■ Todos ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+async function loadTodos() {
+const r = await fetch('/api/todos');
+const todos = await r.json();
+renderTodos('yours', todos.yours || []);
+renderTodos('wife', todos.wife || []);
+}
+function renderTodos(who, items) {
+const el = document.getElementById('todos-' + who);
+const pending = items.filter(t => !t.done).length;
+if (pending > (prevCounts[who] || 0)) {
+const dot = document.getElementById('dot-' + who);
+dot.style.display = 'inline-block';
+setTimeout(() => dot.style.display = 'none', 10000);
+}
+prevCounts[who] = pending;
+el.innerHTML = items.length === 0
+? '<div class=\'empty\'>No tasks yet</div>'
+: items.map(t =>
+'<div class=\'todo-item ' + (t.done ? 'done' : '') + '\'>' +
+'<span>' + (t.done ? '■' : '■') + '</span>' +
+'<span class=\'todo-text\'>' + t.text + '</span></div>'
+).join('');
+}
+loadTodos();
+setInterval(loadTodos, 10000);
+socket.on('todo_update', () => loadTodos());
+// ■■ Photo slideshow ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+async function loadPhotos() {
+const r = await fetch('/api/photos');
+photos = await r.json();
+if (photos.length > 0) showPhoto(0);
+}
+function showPhoto(idx) {
+const img = document.getElementById('photo');
+img.style.opacity = 0;
+setTimeout(() => { img.src = '/photos/' + photos[idx]; img.style.opacity = 1; }, 800);
+}
+loadPhotos();
+setInterval(() => {
+photoIdx = (photoIdx + 1) % Math.max(photos.length, 1);
+showPhoto(photoIdx);
+}, 30000);
+// ■■ Good morning banner ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+function showMorningBanner() {
+const b = document.getElementById('morning-banner');
+b.style.display = 'block';
+setTimeout(() => b.style.display = 'none', 60000);
+}
+</script>
+</body>
+</html>
+
