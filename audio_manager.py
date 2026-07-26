@@ -5,8 +5,8 @@ import os
 pygame.mixer.init()  # initialise once at startup
 
 SOUNDS = {
-    'todo_added': 'static/sounds/todo_added.mp3',
-    'good_morning': 'static/sounds/good_morning.mp3',
+    'todo_added': 'static/sounds/todo_added.wav',
+    'good_morning': 'static/sounds/good_morning.wav',
     'alert': 'static/sounds/alert.mp3',
 }
 
