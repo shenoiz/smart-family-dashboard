@@ -51,6 +51,9 @@ async def cmd_add(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     todos[person].append({"text": task, "done": False})
     save_todos(todos)
 
+    from audio_manager import play_sound
+    play_sound('todo_added')
+
     try:
         from app import notify_todo_update
 
