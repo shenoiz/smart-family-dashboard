@@ -1,5 +1,6 @@
 import json
 import os
+import asyncio
 
 from telegram import Update
 from telegram.ext import (
@@ -179,6 +180,7 @@ async def handle_text(
 
 
 def start_bot():
+    asyncio.set_event_loop(asyncio.new_event_loop())
     app = (
         Application.builder()
         .token(TELEGRAM_BOT_TOKEN)
@@ -206,7 +208,7 @@ def start_bot():
     )
 
     print("Telegram bot started...")
-    app.run_polling()
+    app.run_polling(stop_signals=None)
 
 
 if __name__ == "__main__":
