@@ -45,6 +45,7 @@ def get_weather():
             'description': d['weather'][0]['description'].title(),
             'icon': d['weather'][0]['icon'],
             'humidity': d['main']['humidity'],
+            'wind' : round(d['wind']['speed']*3.6),  
             'city': d['name'],
         })
 

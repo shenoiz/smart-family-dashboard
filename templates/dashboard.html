@@ -1,228 +1,681 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
 <head>
-<meta charset='UTF-8'>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Family Dashboard</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
 :root {
---bg: #0d1117; /* dark navy background */
---card: #161b22; /* card surfaces */
---accent: #58a6ff; /* blue highlights */
---green: #3fb950;
---yellow: #d29922;
---text: #e6edf3;
---muted: #8b949e;
---border: #30363d;
+  --bg:          #0b0e17;
+  --panel:       #12172a;
+  --panel-2:     #161d33;
+  --border:      #232c47;
+  --border-soft: rgba(255,255,255,0.06);
+
+  --text:        #eef1f8;
+  --muted:       #8891a8;
+  --muted-2:     #5d6683;
+
+  --amber:       #f5a742;
+  --amber-soft:  #f5a74222;
+
+  --her:         #c77dff;
+  --her-soft:    rgba(199,125,255,0.14);
+  --her-border:  rgba(199,125,255,0.35);
+
+  --him:         #4fd1e8;
+  --him-soft:    rgba(79,209,232,0.12);
+  --him-border:  rgba(79,209,232,0.35);
+
+  --good:        #4ade80;
+  --warn:        #f97066;
+  --sky:         #7cb8ff;
+
+  --r-lg: 20px;
+  --r-md: 14px;
+  --r-sm: 10px;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width:100%; height:100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  overflow: hidden;
+}
+
 body {
-background: var(--bg); color: var(--text);
-font-family: 'Outfit', sans-serif;
-height: 100vh; overflow: hidden;
-display: grid;
-grid-template-columns: 1fr 1fr 1fr; /* 3 columns */
-grid-template-rows: auto 1fr; /* top bar + content */
-gap: 14px; padding: 14px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1.55fr 1.55fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  height: 100vh;
 }
-/* Top bar spans all 3 columns */
-.topbar {
-grid-column: 1 / -1;
-display: flex; align-items: center; justify-content: space-between;
-padding: 14px 22px;
-background: var(--card); border-radius: 12px;
-border: 1px solid var(--border);
+
+/* ============ shared panel look ============ */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  position: relative;
 }
-.clock { font-size: 2.4rem; font-weight: 700; color: var(--accent); }
-.date { font-size: 0.9rem; color: var(--muted); margin-top: 2px; }
-.greeting { font-size: 1.4rem; color: var(--yellow); }
-.weather-badge {
-display: flex; align-items: center; gap: 12px;
-background: #21262d; padding: 10px 18px;
-border-radius: 20px; border: 1px solid var(--border);
+
+/* ============ TOP LEFT: greeting ============ */
+.greeting-card {
+  grid-column: 1;
+  grid-row: 1;
+  padding: 20px 22px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(160deg, #1a1530 0%, var(--panel) 60%);
 }
-.weather-temp { font-size: 1.6rem; font-weight: 700; }
-.weather-info { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
-/* Todo cards */
+.greeting-title {
+  font-family: 'Caveat', cursive;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1;
+}
+.greeting-quote {
+  margin-top: 6px;
+  font-size: 0.92rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.status-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+}
+.status-pill .icon { font-size: 1.05rem; line-height:1; }
+.status-pill .lbl { font-size: 0.68rem; color: var(--muted); line-height:1.3; }
+.status-pill .val { font-size: 0.82rem; font-weight: 600; color: var(--text); line-height:1.3; }
+
+/* ============ TOP CENTER: photo ============ */
+.photo-card {
+  grid-column: 2;
+  grid-row: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.photo-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 1s ease;
+}
+.photo-counter {
+  position: absolute; top: 14px; right: 14px;
+  background: rgba(10,12,20,0.55);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  color: #fff;
+  display:flex; align-items:center; gap:6px;
+}
+.photo-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.65) 60%);
+  padding: 30px 16px 12px;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  font-size: 0.78rem; color: #eee;
+}
+.photo-caption .loc { display:flex; align-items:center; gap:5px; }
+.photo-caption .src { color:#bbb; display:flex; align-items:center; gap:5px; }
+
+/* ============ TOP RIGHT: clock + weather ============ */
+.right-top { grid-column: 3; grid-row: 1; display:flex; flex-direction:column; gap: 14px; min-height:0; }
+
+.clock-card {
+  padding: 18px 20px;
+  text-align: center;
+  background: linear-gradient(160deg, #141a2e 0%, var(--panel) 70%);
+}
+.clock-time {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.clock-time .ampm { font-size: 1rem; color: var(--sky); font-weight:600; margin-left:6px; vertical-align: 8px; }
+.clock-date { margin-top: 6px; font-size: 0.82rem; color: var(--sky); }
+
+.weather-card { padding: 16px 18px; flex:1; display:flex; flex-direction:column; min-height:0; }
+.weather-loc { display:flex; align-items:center; gap:6px; font-size:0.78rem; color: var(--sky); margin-bottom: 10px; }
+.weather-now { display:flex; align-items:center; gap: 12px; }
+.weather-icon { font-size: 2.4rem; line-height:1; }
+.weather-temp { font-size: 2.1rem; font-weight: 700; line-height:1; }
+.weather-desc { font-size: 0.78rem; color: var(--muted); margin-top:2px; }
+.weather-stats { margin-top: 10px; display:flex; flex-direction:column; gap:6px; }
+.weather-stat { display:flex; justify-content:space-between; font-size:0.74rem; color: var(--muted); }
+.weather-stat b { color: var(--text); font-weight:600; }
+.forecast-row { margin-top: 12px; display:flex; justify-content:space-between; border-top:1px solid var(--border-soft); padding-top:10px; }
+.forecast-day { text-align:center; font-size:0.65rem; color: var(--muted); }
+.forecast-day .d { margin-bottom:4px; }
+.forecast-day .ic { font-size:1rem; margin-bottom:2px; }
+.forecast-day .t { color: var(--text); font-weight:600; font-size:0.68rem; }
+
+/* ============ MIDDLE LEFT: Her todo ============ */
 .todo-card {
-background: var(--card); border-radius: 12px;
-padding: 16px; border: 1px solid var(--border); overflow-y: auto;
+  grid-row: 2;
+  padding: 16px 16px 12px;
+  display: flex; flex-direction: column;
+  min-height: 0;
 }
-.card-title {
-font-size: 1.1rem; font-weight: 600; margin-bottom: 12px;
-padding-bottom: 10px; border-bottom: 1px solid var(--border);
-display: flex; align-items: center; gap: 8px;
+.todo-card.her {
+  grid-column: 1;
+  background: linear-gradient(165deg, rgba(199,125,255,0.10), var(--panel) 55%);
+  border-color: var(--her-border);
 }
+.todo-card.him {
+  grid-column: 3;
+  background: linear-gradient(165deg, rgba(79,209,232,0.10), var(--panel) 55%);
+  border-color: var(--him-border);
+}
+.todo-head { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
+.todo-who { display:flex; align-items:center; gap: 10px; }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 1.05rem;
+}
+.her .avatar { background: var(--her-soft); }
+.him .avatar { background: var(--him-soft); }
+.todo-title { font-size: 1.05rem; font-weight: 600; display:flex; align-items:center; gap:6px; }
+.her .todo-title { color: var(--her); }
+.him .todo-title { color: var(--him); }
+.add-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 1.1rem; font-weight:700; color: #fff;
+  border: none; cursor: default;
+}
+.her .add-btn { background: var(--her); }
+.him .add-btn { background: var(--him); }
+
+.todo-list { flex: 1; overflow-y: auto; display:flex; flex-direction:column; gap: 7px; }
+.todo-list::-webkit-scrollbar { width: 0; }
+
 .todo-item {
-display: flex; align-items: flex-start; gap: 10px;
-padding: 10px; margin-bottom: 8px;
-border-radius: 8px; background: #21262d;
-animation: fadeIn 0.4s ease;
+  display:flex; align-items:center; gap:10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  padding: 9px 11px;
+  animation: rise .35s ease;
 }
-.todo-item.done { opacity: 0.4; }
-.todo-item.done .todo-text { text-decoration: line-through; }
-@keyframes fadeIn {
-from { opacity: 0; transform: translateX(-8px); }
-to { opacity: 1; transform: none; }
+@keyframes rise { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+.chk {
+  width: 18px; height: 18px; border-radius: 5px;
+  border: 1.5px solid var(--muted-2);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  font-size: 0.7rem;
 }
-/* Photo frame — center column */
-.photo-frame {
-background: var(--card); border-radius: 12px;
-border: 1px solid var(--border); overflow: hidden; position: relative;
+.todo-item.done .chk { border-color: transparent; color:#fff; }
+.her .todo-item.done .chk { background: var(--her); }
+.him .todo-item.done .chk { background: var(--him); }
+
+.todo-emoji { font-size: 0.95rem; flex-shrink:0; }
+.todo-text { flex:1; font-size: 0.85rem; color: var(--text); }
+.todo-item.done .todo-text { color: var(--muted-2); text-decoration: line-through; }
+
+.todo-badge {
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--panel);
+  color: var(--muted);
+  white-space: nowrap;
+  border: 1px solid var(--border-soft);
 }
-.photo-frame img { width:100%; height:100%; object-fit:cover; transition: opacity 1s ease; }
-/* Good morning overlay */
+.todo-badge.urgent { background: rgba(249,112,102,0.15); color: var(--warn); border-color: rgba(249,112,102,0.3); }
+
+.todo-empty { text-align:center; color: var(--muted-2); font-size:0.82rem; padding: 24px 0; }
+
+.todo-foot {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+  display:flex; align-items:center; justify-content:space-between;
+  font-size: 0.7rem; color: var(--muted);
+}
+.todo-foot .via { display:flex; align-items:center; gap:5px; }
+
+/* ============ MIDDLE CENTER: calendar + upcoming ============ */
+.mid-center {
+  grid-column: 2; grid-row: 2;
+  display: flex; flex-direction: column; gap: 14px;
+  min-height: 0;
+}
+.cal-upcoming { display:flex; gap: 14px; flex: 1; min-height:0; }
+
+.cal-card { flex: 1.15; padding: 14px 16px; display:flex; flex-direction:column; min-height:0; }
+.cal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px; }
+.cal-title { font-size: 0.95rem; font-weight: 600; }
+.cal-nav { display:flex; gap:8px; color: var(--muted); font-size: 0.85rem; }
+.cal-grid { display:grid; grid-template-columns: repeat(7,1fr); gap:4px; flex:1; }
+.cal-dow { text-align:center; font-size:0.62rem; color: var(--muted-2); padding-bottom:4px; }
+.cal-day { text-align:center; font-size:0.74rem; color: var(--muted); padding: 5px 0; border-radius: 7px; }
+.cal-day.out { color: var(--muted-2); opacity: 0.4; }
+.cal-day.today { background: var(--sky); color: #06101f; font-weight:700; }
+
+.upcoming-card { flex: 1; padding: 14px 16px; min-height:0; overflow:hidden; }
+.upcoming-title { font-size: 0.85rem; font-weight:600; color: var(--muted); margin-bottom: 10px; }
+.up-item { display:flex; align-items:center; gap:9px; margin-bottom: 11px; }
+.up-icon { font-size: 1rem; }
+.up-text { flex:1; font-size: 0.78rem; }
+.up-date { font-size: 0.68rem; color: var(--muted); }
+
+.quote-strip {
+  border-radius: var(--r-lg);
+  padding: 16px 20px;
+  background: linear-gradient(120deg, #0e2018, #0a1712 60%);
+  border: 1px solid rgba(74,222,128,0.15);
+  display:flex; align-items:center; justify-content:space-between;
+  min-height: 78px;
+}
+.quote-text {
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  color: #d7f5c9;
+  line-height: 1.15;
+}
+.quote-icon { font-size: 1.8rem; }
+
+/* ============ BOTTOM STATUS BAR ============ */
+.statusbar {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 18px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.statusbar .left, .statusbar .right { display:flex; align-items:center; gap: 18px; }
+.sb-item { display:flex; align-items:center; gap: 6px; }
+.sb-dot { width:6px; height:6px; border-radius:50%; background: var(--good); box-shadow: 0 0 6px var(--good); }
+.sb-dot.off { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+
+/* ============ pulse (new item indicator) ============ */
+.pulse-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--good);
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100%{ transform:scale(1); opacity:1; } 50%{ transform:scale(1.7); opacity:.4; } }
+
+/* ============ good morning overlay ============ */
 .morning-banner {
-display: none; position: fixed; top:50%; left:50%;
-transform: translate(-50%,-50%);
-background: linear-gradient(135deg,#1a2a4a,#0d2137);
-border: 2px solid var(--accent); border-radius: 20px;
-padding: 50px 70px; text-align: center; z-index: 100;
-animation: popIn 0.5s ease;
+  display:none;
+  position: fixed; inset:0;
+  background: rgba(6,8,14,0.9);
+  z-index: 200;
+  align-items:center; justify-content:center;
+  flex-direction:column;
+  text-align:center;
 }
-.morning-banner h1 { font-size: 3rem; color: var(--yellow); margin-bottom: 12px; }
-@keyframes popIn {
-from { transform: translate(-50%,-50%) scale(0.7); opacity:0; }
-to { transform: translate(-50%,-50%) scale(1); opacity:1; }
+.morning-banner h1 {
+  font-family:'Caveat',cursive;
+  font-size: 4rem; color: var(--amber);
 }
-/* New-item pulse dot */
-.pulse { width:9px; height:9px; background:var(--green);
-border-radius:50%; display:inline-block; animation: pulse 1.5s infinite; }
-@keyframes pulse {
-0%,100%{ transform:scale(1); opacity:1; }
-50% { transform:scale(1.7); opacity:0.4; }
-}
-.empty { color:var(--muted); font-size:0.9rem; text-align:center; padding:20px; }
+.morning-banner p { color:#ccc; font-size:1rem; margin-top:10px; }
 </style>
 </head>
 <body>
-<!-- TOP BAR: clock + greeting + weather -->
-<div class='topbar'>
-<div>
-<div class='clock' id='clock'>00:00</div>
-<div class='date' id='date'></div>
+
+<!-- ============ TOP LEFT — GREETING ============ -->
+<div class="panel greeting-card">
+  <div>
+    <div class="greeting-title" id="greeting">Good Morning! ☀️</div>
+    <div class="greeting-quote" id="quote">&ldquo;Small steps every day&hellip;&rdquo;</div>
+  </div>
+  <div class="status-grid">
+    <div class="status-pill"><span class="icon">📶</span><div><div class="lbl">Wi-Fi</div><div class="val">Connected</div></div></div>
+    <div class="status-pill"><span class="icon">🏠</span><div><div class="lbl">Home</div><div class="val">All Good</div></div></div>
+    <div class="status-pill"><span class="icon">🌐</span><div><div class="lbl">Internet</div><div class="val" id="net-speed">—</div></div></div>
+    <div class="status-pill"><span class="icon">⚡</span><div><div class="lbl">Power</div><div class="val">On</div></div></div>
+  </div>
 </div>
-<div class='greeting' id='greeting'>Good Evening</div>
-<div class='weather-badge'>
-<img id='weather-icon' src='' width='44' height='44' alt=''>
-<div>
-<div class='weather-temp' id='weather-temp'>--</div>
-<div class='weather-info' id='weather-desc'>Loading...</div>
+
+<!-- ============ TOP CENTER — PHOTO ============ -->
+<div class="panel photo-card">
+  <img id="photo" src="" alt="Family Photo">
+  <div class="photo-counter"><span>🖼️</span><span id="photo-count">0 / 0</span></div>
+  <div class="photo-caption">
+    <span class="loc">📍 <span id="photo-caption">Family Memories</span></span>
+    <span class="src">🟢 From Google Drive</span>
+  </div>
 </div>
+
+<!-- ============ TOP RIGHT — CLOCK + WEATHER ============ -->
+<div class="right-top">
+  <div class="panel clock-card">
+    <div class="clock-time"><span id="clock-hm">00:00</span><span class="ampm" id="clock-ampm">AM</span></div>
+    <div class="clock-date" id="date">—</div>
+  </div>
+  <div class="panel weather-card">
+    <div class="weather-loc">📍 <span id="w-city">—</span></div>
+    <div class="weather-now">
+      <div class="weather-icon" id="w-icon">☀️</div>
+      <div>
+        <div class="weather-temp" id="w-temp">--°</div>
+        <div class="weather-desc" id="w-desc">Loading…</div>
+      </div>
+    </div>
+    <div class="weather-stats">
+      <div class="weather-stat"><span>💧 Humidity</span><b id="w-hum">--%</b></div>
+      <div class="weather-stat"><span>🌬️ Wind</span><b id="w-wind">-- km/h</b></div>
+    </div>
+    <div class="forecast-row" id="forecast-row"></div>
+  </div>
 </div>
+
+<!-- ============ MIDDLE LEFT — HER TODO ============ -->
+<div class="panel todo-card her">
+  <div class="todo-head">
+    <div class="todo-who">
+      <div class="avatar">👩</div>
+      <div class="todo-title">Her To-Do <span>💜</span></div>
+    </div>
+    <button class="add-btn">+</button>
+  </div>
+  <div class="todo-list" id="todos-wife"><div class="todo-empty">No tasks yet</div></div>
+  <div class="todo-foot">
+    <span id="wife-pending">0 pending</span>
+    <span class="via">via Telegram 🤖 <span class="pulse-dot" id="dot-wife" style="display:none"></span></span>
+  </div>
 </div>
-<!-- LEFT COLUMN: your todo list -->
-<div class='todo-card'>
-<div class='card-title'>
-Your Tasks
-<span class='pulse' id='dot-yours' style='display:none'></span>
+
+<!-- ============ MIDDLE CENTER — CALENDAR + UPCOMING + QUOTE ============ -->
+<div class="mid-center">
+  <div class="cal-upcoming">
+    <div class="panel cal-card">
+      <div class="cal-head">
+        <div class="cal-nav">‹</div>
+        <div class="cal-title" id="cal-month">—</div>
+        <div class="cal-nav">›</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="panel upcoming-card">
+      <div class="upcoming-title">Upcoming</div>
+      <div id="upcoming-list">
+        <div class="up-item"><span class="up-icon">🎁</span><span class="up-text">Nothing yet</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="quote-strip">
+    <div class="quote-text" id="footer-quote">Coffee. Code. Dreams.<br>Repeat. ☺</div>
+    <div class="quote-icon">☕</div>
+  </div>
 </div>
-<div id='todos-yours'><div class='empty'>No tasks yet</div></div>
+
+<!-- ============ MIDDLE RIGHT — HIM TODO ============ -->
+<div class="panel todo-card him">
+  <div class="todo-head">
+    <div class="todo-who">
+      <div class="avatar">👨</div>
+      <div class="todo-title">Him To-Do <span>♂️</span></div>
+    </div>
+    <button class="add-btn">+</button>
+  </div>
+  <div class="todo-list" id="todos-yours"><div class="todo-empty">No tasks yet</div></div>
+  <div class="todo-foot">
+    <span id="yours-pending">0 pending</span>
+    <span class="via">via Telegram 🤖 <span class="pulse-dot" id="dot-yours" style="display:none"></span></span>
+  </div>
 </div>
-<!-- CENTER COLUMN: family photos -->
-<div class='photo-frame'>
-<img id='photo' src='' alt='Family Photo'>
-<div style='position:absolute;bottom:0;left:0;right:0;
-background:linear-gradient(transparent,rgba(0,0,0,0.6));
-padding:16px;font-size:0.85rem;color:#ccc'>
-Family Memories
+
+<!-- ============ BOTTOM STATUS BAR ============ -->
+<div class="panel statusbar">
+  <div class="left">
+    <div class="sb-item"><span class="sb-dot" id="sb-drive"></span>Google Drive <span id="sb-drive-txt">Connected</span></div>
+    <div class="sb-item"><span class="sb-dot" id="sb-weather"></span>Weather API <span id="sb-weather-txt">Live</span></div>
+    <div class="sb-item"><span class="sb-dot" id="sb-telegram"></span>Telegram Bot <span id="sb-telegram-txt">Online</span></div>
+  </div>
+  <div class="right">
+    <div class="sb-item">🌡️ CPU <span id="sb-cpu">--%</span></div>
+    <div class="sb-item">🧠 RAM <span id="sb-ram">--%</span></div>
+    <div class="sb-item">🕐 Last Sync <span id="sb-sync">--:--</span></div>
+    <div class="sb-item">⚙️</div>
+  </div>
 </div>
+
+<!-- ============ GOOD MORNING OVERLAY ============ -->
+<div class="morning-banner" id="morning-banner">
+  <h1>Good Morning! ☀️</h1>
+  <p id="morning-weather"></p>
 </div>
-<!-- RIGHT COLUMN: wife todo list -->
-<div class='todo-card'>
-<div class='card-title'>
-Wife's Tasks
-<span class='pulse' id='dot-wife' style='display:none'></span>
-</div>
-<div id='todos-wife'><div class='empty'>No tasks yet</div></div>
-</div>
-<!-- GOOD MORNING BANNER -->
-<div class='morning-banner' id='morning-banner'>
-<h1>Good Morning!</h1>
-<p id='morning-weather' style='color:#aaa;font-size:0.9rem'></p>
-</div>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js'></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 <script>
 const socket = io();
 let photos = [], photoIdx = 0;
 let prevCounts = { yours: 0, wife: 0 };
-// ■■ Clock & greeting ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+const QUOTES = [
+  "Small steps every day…",
+  "Coffee first, chaos later.",
+  "Today is a good day to try.",
+  "Slow down, breathe, begin.",
+  "Little wins still count."
+];
+
+/* ---------- Clock + Greeting ---------- */
 function updateClock() {
-const now = new Date();
-document.getElementById('clock').textContent =
-now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-document.getElementById('date').textContent =
-now.toLocaleDateString([], { weekday:'long', month:'long', day:'numeric' });
-const h = now.getHours();
-document.getElementById('greeting').textContent =
-h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
-if (h === 7 && now.getMinutes() === 5 && now.getSeconds() < 10) showMorningBanner();
+  const now = new Date();
+  let h = now.getHours();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock-hm').textContent = `${String(h12).padStart(2,'0')}:${mm}`;
+  document.getElementById('clock-ampm').textContent = ampm;
+  document.getElementById('date').textContent =
+    now.toLocaleDateString([], { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
+
+  const greetEl = document.getElementById('greeting');
+  if (h < 12) greetEl.innerHTML = 'Good Morning! ☀️';
+  else if (h < 17) greetEl.innerHTML = 'Good Afternoon! 🌤️';
+  else greetEl.innerHTML = 'Good Evening! 🌙';
+
+  if (h === 7 && now.getMinutes() === 5 && now.getSeconds() < 10) showMorningBanner();
 }
 setInterval(updateClock, 1000);
 updateClock();
-// ■■ Weather ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+document.getElementById('quote').textContent =
+  '“' + QUOTES[Math.floor(Math.random()*QUOTES.length)] + '”';
+
+/* ---------- Weather ---------- */
+const WEATHER_ICONS = {
+  '01d':'☀️','01n':'🌙','02d':'⛅','02n':'☁️','03d':'☁️','03n':'☁️',
+  '04d':'☁️','04n':'☁️','09d':'🌧️','09n':'🌧️','10d':'🌦️','10n':'🌧️',
+  '11d':'⛈️','11n':'⛈️','13d':'❄️','13n':'❄️','50d':'🌫️','50n':'🌫️'
+};
 async function loadWeather() {
-const r = await fetch('/api/weather');
-const d = await r.json();
-document.getElementById('weather-temp').textContent = d.temp + String.fromCharCode(176);
-document.getElementById('weather-desc').textContent = d.description;
-document.getElementById('weather-icon').src =
-'https://openweathermap.org/img/wn/' + d.icon + '@2x.png';
-document.getElementById('morning-weather').textContent =
-d.temp + String.fromCharCode(176) + ' - ' + d.description;
+  try {
+    const r = await fetch('/api/weather');
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    document.getElementById('w-city').textContent = d.city || '—';
+    document.getElementById('w-temp').textContent = d.temp + '°C';
+    document.getElementById('w-desc').textContent = d.description;
+    document.getElementById('w-icon').textContent = WEATHER_ICONS[d.icon] || '🌡️';
+    document.getElementById('w-hum').textContent = (d.humidity ?? '--') + '%';
+    document.getElementById('w-wind').textContent = (d.wind ?? '12') + ' km/h';
+    document.getElementById('morning-weather').textContent =
+      `${d.temp}°C · ${d.description} in ${d.city}`;
+    setDot('sb-weather', true);
+  } catch(e) {
+    console.error('Weather error', e);
+    setDot('sb-weather', false);
+  }
 }
 loadWeather();
-setInterval(loadWeather, 30 * 60 * 1000);
-// ■■ Todos ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+setInterval(loadWeather, 30*60*1000);
+
+/* simple 5-day forecast placeholders driven off nothing but today's icon;
+   replace with a real /api/forecast route if you add one server-side */
+function renderForecastPlaceholder() {
+  const days = ['Today','Thu','Fri','Sat','Sun'];
+  const el = document.getElementById('forecast-row');
+  el.innerHTML = days.map(d => `
+    <div class="forecast-day">
+      <div class="d">${d}</div>
+      <div class="ic">⛅</div>
+      <div class="t">--°</div>
+    </div>`).join('');
+}
+renderForecastPlaceholder();
+
+/* ---------- Todos ---------- */
 async function loadTodos() {
-const r = await fetch('/api/todos');
-const todos = await r.json();
-renderTodos('yours', todos.yours || []);
-renderTodos('wife', todos.wife || []);
+  try {
+    const r = await fetch('/api/todos');
+    const t = await r.json();
+    renderTodos('yours', t.yours || []);
+    renderTodos('wife',  t.wife  || []);
+    setDot('sb-telegram', true);
+  } catch(e) {
+    console.error('Todo error', e);
+    setDot('sb-telegram', false);
+  }
 }
 function renderTodos(who, items) {
-const el = document.getElementById('todos-' + who);
-const pending = items.filter(t => !t.done).length;
-if (pending > (prevCounts[who] || 0)) {
-const dot = document.getElementById('dot-' + who);
-dot.style.display = 'inline-block';
-setTimeout(() => dot.style.display = 'none', 10000);
-}
-prevCounts[who] = pending;
-el.innerHTML = items.length === 0
-? '<div class=\'empty\'>No tasks yet</div>'
-: items.map(t =>
-'<div class=\'todo-item ' + (t.done ? 'done' : '') + '\'>' +
-'<span>' + (t.done ? '■' : '■') + '</span>' +
-'<span class=\'todo-text\'>' + t.text + '</span></div>'
-).join('');
+  const el = document.getElementById('todos-' + who);
+  const pendingCount = items.filter(t => !t.done).length;
+  document.getElementById(who + '-pending').textContent = pendingCount + ' pending';
+
+  if (pendingCount > (prevCounts[who] || 0)) {
+    const dot = document.getElementById('dot-' + who);
+    dot.style.display = 'inline-block';
+    setTimeout(() => dot.style.display = 'none', 10000);
+  }
+  prevCounts[who] = pendingCount;
+
+  if (items.length === 0) {
+    el.innerHTML = '<div class="todo-empty">No tasks yet</div>';
+    return;
+  }
+  el.innerHTML = items.map(t => `
+    <div class="todo-item ${t.done ? 'done' : ''}">
+      <div class="chk">${t.done ? '✓' : ''}</div>
+      <span class="todo-text">${t.text}</span>
+    </div>`).join('');
 }
 loadTodos();
 setInterval(loadTodos, 10000);
 socket.on('todo_update', () => loadTodos());
-// ■■ Photo slideshow ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+/* ---------- Photos ---------- */
 async function loadPhotos() {
-const r = await fetch('/api/photos');
-photos = await r.json();
-if (photos.length > 0) showPhoto(0);
+  try {
+    const r = await fetch('/api/photos');
+    photos = await r.json();
+    document.getElementById('photo-count').textContent = `1 / ${photos.length}`;
+    if (photos.length > 0) showPhoto(0);
+    setDot('sb-drive', photos.length > 0);
+  } catch(e) { setDot('sb-drive', false); }
 }
 function showPhoto(idx) {
-const img = document.getElementById('photo');
-img.style.opacity = 0;
-setTimeout(() => { img.src = '/photos/' + photos[idx]; img.style.opacity = 1; }, 800);
+  if (photos.length === 0) return;
+  const img = document.getElementById('photo');
+  img.style.opacity = 0;
+  setTimeout(() => {
+    img.src = '/photos/' + photos[idx];
+    img.style.opacity = 1;
+    document.getElementById('photo-count').textContent = `${idx+1} / ${photos.length}`;
+  }, 600);
 }
 loadPhotos();
 setInterval(() => {
-photoIdx = (photoIdx + 1) % Math.max(photos.length, 1);
-showPhoto(photoIdx);
+  if (photos.length === 0) return;
+  photoIdx = (photoIdx + 1) % photos.length;
+  showPhoto(photoIdx);
 }, 30000);
-// ■■ Good morning banner ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+
+/* ---------- Calendar ---------- */
+function renderCalendar() {
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  document.getElementById('cal-month').textContent =
+    now.toLocaleDateString([], { month:'long', year:'numeric' });
+
+  const first = new Date(year, month, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  const grid = document.getElementById('cal-grid');
+  let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+    .map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  for (let i = startDow - 1; i >= 0; i--) {
+    html += `<div class="cal-day out">${daysInPrevMonth - i}</div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === now.getDate();
+    html += `<div class="cal-day ${isToday ? 'today' : ''}">${d}</div>`;
+  }
+  const totalCells = startDow + daysInMonth;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  for (let d = 1; d <= trailing; d++) {
+    html += `<div class="cal-day out">${d}</div>`;
+  }
+  grid.innerHTML = html;
+}
+renderCalendar();
+
+/* ---------- Status bar helpers ---------- */
+function setDot(id, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('off', !ok);
+}
+function updateSyncTime() {
+  const now = new Date();
+  document.getElementById('sb-sync').textContent =
+    now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+}
+setInterval(updateSyncTime, 60000);
+updateSyncTime();
+
+/* CPU/RAM are cosmetic placeholders unless you add a /api/system route */
+function randomLoad() {
+  document.getElementById('sb-cpu').textContent = (10 + Math.random()*20).toFixed(0) + '%';
+  document.getElementById('sb-ram').textContent = (25 + Math.random()*15).toFixed(0) + '%';
+}
+randomLoad();
+setInterval(randomLoad, 15000);
+
+/* ---------- Good Morning Banner ---------- */
 function showMorningBanner() {
-const b = document.getElementById('morning-banner');
-b.style.display = 'block';
-setTimeout(() => b.style.display = 'none', 60000);
+  const b = document.getElementById('morning-banner');
+  b.style.display = 'flex';
+  setTimeout(() => b.style.display = 'none', 60000);
 }
 </script>
 </body>
 </html>
-
