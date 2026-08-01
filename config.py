@@ -34,3 +34,8 @@ IOT_DEVICES = {
 'fan on': ('home/bedroom/fan', 'ON'),
 'fan off': ('home/bedroom/fan', 'OFF'),
 }
+#ProKerala astrocalender API
+PROKERALA_CLIENT_ID     = os.getenv('PROKERALA_CLIENT_ID')
+PROKERALA_CLIENT_SECRET = os.getenv('PROKERALA_CLIENT_SECRET')
+PROKERALA_LATITUDE      = os.getenv('PROKERALA_LATITUDE')
+PROKERALA_LONGITUDE     = os.getenv('PROKERALA_LONGITUDE')

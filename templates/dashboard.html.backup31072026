@@ -52,7 +52,7 @@ body {
   padding: 16px;
   display: grid;
   grid-template-columns: 1.55fr 1.55fr 1fr;
-  grid-template-rows: 260px 1fr 56px;
+  grid-template-rows: auto 1fr auto;
   gap: 14px;
   height: 100vh;
 }
@@ -60,14 +60,9 @@ body {
 /* ============ shared panel look ============ */
 .panel {
   background: var(--panel);
-  background-clip: padding-box;
   border: 1px solid var(--border-soft);
   border-radius: var(--r-lg);
   position: relative;
-  isolation: isolate;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.02) inset,
-    0 8px 24px rgba(0,0,0,0.35);
 }
 
 /* ============ TOP LEFT: greeting ============ */
@@ -78,27 +73,23 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background:
-    radial-gradient(120% 140% at 0% 0%, #1f1938 0%, transparent 55%),
-    var(--panel);
+  background: linear-gradient(160deg, #1a1530 0%, var(--panel) 60%);
 }
 .greeting-title {
   font-family: 'Caveat', cursive;
-  font-size: 2.2rem;
+  font-size: 2.1rem;
   font-weight: 700;
   color: var(--amber);
   display: flex;
   align-items: center;
   gap: 8px;
   line-height: 1;
-  text-shadow: 0 0 18px rgba(245,167,66,0.55), 0 0 36px rgba(245,167,66,0.25);
 }
 .greeting-quote {
   margin-top: 6px;
   font-size: 0.92rem;
   color: var(--muted);
   font-style: italic;
-  transition: opacity 0.4s ease;
 }
 .status-grid {
   margin-top: 14px;
@@ -118,23 +109,17 @@ body {
 .status-pill .icon { font-size: 1.05rem; line-height:1; }
 .status-pill .lbl { font-size: 0.68rem; color: var(--muted); line-height:1.3; }
 .status-pill .val { font-size: 0.82rem; font-weight: 600; color: var(--text); line-height:1.3; }
-.status-pill .ip-sub { font-size: 0.62rem; color: var(--muted-2); line-height:1.2; font-family: 'Courier New', monospace; }
 
 /* ============ TOP CENTER: photo ============ */
 .photo-card {
   grid-column: 2;
   grid-row: 1;
   overflow: hidden;
-  position: relative;
-  height: 100%;
-  width: 100%;
+  min-height: 0;
 }
 .photo-card img {
-  position: absolute;
-  top: 0; left: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: center;
   display: block;
   transition: opacity 1s ease;
 }
@@ -165,21 +150,15 @@ body {
 .clock-card {
   padding: 18px 20px;
   text-align: center;
-  background:
-    radial-gradient(120% 160% at 50% 0%, #16213e 0%, transparent 60%),
-    var(--panel);
+  background: linear-gradient(160deg, #141a2e 0%, var(--panel) 70%);
 }
 .clock-time {
   font-size: 2.5rem;
   font-weight: 700;
   letter-spacing: -1px;
   line-height: 1;
-  text-shadow: 0 0 20px rgba(124,184,255,0.35);
 }
-.clock-time .ampm {
-  font-size: 1rem; color: var(--sky); font-weight:600; margin-left:6px; vertical-align: 8px;
-  text-shadow: 0 0 12px rgba(124,184,255,0.6);
-}
+.clock-time .ampm { font-size: 1rem; color: var(--sky); font-weight:600; margin-left:6px; vertical-align: 8px; }
 .clock-date { margin-top: 6px; font-size: 0.82rem; color: var(--sky); }
 
 .weather-card { padding: 16px 18px; flex:1; display:flex; flex-direction:column; min-height:0; }
@@ -206,25 +185,13 @@ body {
 }
 .todo-card.her {
   grid-column: 1;
-  background:
-    radial-gradient(140% 100% at 0% 0%, rgba(199,125,255,0.16) 0%, transparent 55%),
-    var(--panel);
+  background: linear-gradient(165deg, rgba(199,125,255,0.10), var(--panel) 55%);
   border-color: var(--her-border);
-  box-shadow:
-    0 0 0 1px rgba(199,125,255,0.08) inset,
-    0 0 24px rgba(199,125,255,0.10),
-    0 8px 24px rgba(0,0,0,0.35);
 }
 .todo-card.him {
   grid-column: 3;
-  background:
-    radial-gradient(140% 100% at 100% 0%, rgba(79,209,232,0.16) 0%, transparent 55%),
-    var(--panel);
+  background: linear-gradient(165deg, rgba(79,209,232,0.10), var(--panel) 55%);
   border-color: var(--him-border);
-  box-shadow:
-    0 0 0 1px rgba(79,209,232,0.08) inset,
-    0 0 24px rgba(79,209,232,0.10),
-    0 8px 24px rgba(0,0,0,0.35);
 }
 .todo-head { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
 .todo-who { display:flex; align-items:center; gap: 10px; }
@@ -236,8 +203,8 @@ body {
 .her .avatar { background: var(--her-soft); }
 .him .avatar { background: var(--him-soft); }
 .todo-title { font-size: 1.05rem; font-weight: 600; display:flex; align-items:center; gap:6px; }
-.her .todo-title { color: var(--her); text-shadow: 0 0 14px rgba(199,125,255,0.5); }
-.him .todo-title { color: var(--him); text-shadow: 0 0 14px rgba(79,209,232,0.5); }
+.her .todo-title { color: var(--her); }
+.him .todo-title { color: var(--him); }
 .add-btn {
   width: 30px; height: 30px; border-radius: 50%;
   display:flex; align-items:center; justify-content:center;
@@ -316,44 +283,26 @@ body {
 
 .upcoming-card { flex: 1; padding: 14px 16px; min-height:0; overflow:hidden; }
 .upcoming-title { font-size: 0.85rem; font-weight:600; color: var(--muted); margin-bottom: 10px; }
-.up-item { display:flex; align-items:flex-start; gap:8px; margin-bottom: 8px; }
-.up-icon { font-size: 0.9rem; flex-shrink:0; margin-top:1px; }
-.up-text { flex:1; font-size: 0.72rem; line-height:1.35; color: var(--text); }
-.up-year { color: var(--sky); font-weight:600; }
+.up-item { display:flex; align-items:center; gap:9px; margin-bottom: 11px; }
+.up-icon { font-size: 1rem; }
+.up-text { flex:1; font-size: 0.78rem; }
 .up-date { font-size: 0.68rem; color: var(--muted); }
-.specialty-badge {
-  font-size: 0.62rem; font-weight:600;
-  background: rgba(245,167,66,0.15); color: var(--amber);
-  border: 1px solid rgba(245,167,66,0.3);
-  border-radius: 20px; padding: 2px 8px;
-  margin-left: 6px;
-}
 
 .quote-strip {
   border-radius: var(--r-lg);
-  padding: 16px 22px;
-  /* solid opaque base first, THEN the tint on top — this is what fixes the bleed-through */
-  background-color: #0b1712;
-  background-image:
-    radial-gradient(130% 160% at 0% 100%, rgba(74,222,128,0.14) 0%, transparent 60%),
-    linear-gradient(120deg, #0d1f16, #0a1712 65%);
-  border: 1px solid rgba(74,222,128,0.22);
-  box-shadow:
-    0 0 0 1px rgba(74,222,128,0.06) inset,
-    0 0 26px rgba(74,222,128,0.12),
-    0 8px 24px rgba(0,0,0,0.35);
+  padding: 16px 20px;
+  background: linear-gradient(120deg, #0e2018, #0a1712 60%);
+  border: 1px solid rgba(74,222,128,0.15);
   display:flex; align-items:center; justify-content:space-between;
   min-height: 78px;
-  transition: opacity 0.4s ease;
 }
 .quote-text {
   font-family: 'Caveat', cursive;
-  font-size: 1.55rem;
+  font-size: 1.5rem;
   color: #d7f5c9;
-  line-height: 1.2;
-  text-shadow: 0 0 16px rgba(74,222,128,0.35);
+  line-height: 1.15;
 }
-.quote-icon { font-size: 1.8rem; filter: drop-shadow(0 0 10px rgba(74,222,128,0.4)); }
+.quote-icon { font-size: 1.8rem; }
 
 /* ============ BOTTOM STATUS BAR ============ */
 .statusbar {
@@ -406,7 +355,7 @@ body {
   <div class="status-grid">
     <div class="status-pill"><span class="icon">📶</span><div><div class="lbl">Wi-Fi</div><div class="val">Connected</div></div></div>
     <div class="status-pill"><span class="icon">🏠</span><div><div class="lbl">Home</div><div class="val">All Good</div></div></div>
-    <div class="status-pill"><span class="icon">🌐</span><div><div class="lbl">Internet</div><div class="val" id="net-speed">—</div><div class="ip-sub" id="pi-ip"></div></div></div>
+    <div class="status-pill"><span class="icon">🌐</span><div><div class="lbl">Internet</div><div class="val" id="net-speed">—</div></div></div>
     <div class="status-pill"><span class="icon">⚡</span><div><div class="lbl">Power</div><div class="val">On</div></div></div>
   </div>
 </div>
@@ -472,19 +421,15 @@ body {
       <div class="cal-grid" id="cal-grid"></div>
     </div>
     <div class="panel upcoming-card">
-      <div class="upcoming-title">Today's Specialty <span id="specialty-badge" class="specialty-badge"></span></div>
-      <div id="specialty-list">
-        <div class="up-item"><span class="up-icon">📅</span><span class="up-text">Loading…</span></div>
-      </div>
-      <div class="upcoming-title" style="margin-top:12px">On This Day</div>
-      <div id="onthisday-list">
-        <div class="up-item"><span class="up-icon">🌍</span><span class="up-text">Loading…</span></div>
+      <div class="upcoming-title">Upcoming</div>
+      <div id="upcoming-list">
+        <div class="up-item"><span class="up-icon">🎁</span><span class="up-text">Nothing yet</span></div>
       </div>
     </div>
   </div>
-  <div class="quote-strip" id="quote-strip">
+  <div class="quote-strip">
     <div class="quote-text" id="footer-quote">Coffee. Code. Dreams.<br>Repeat. ☺</div>
-    <div class="quote-icon" id="footer-quote-icon">☕</div>
+    <div class="quote-icon">☕</div>
   </div>
 </div>
 
@@ -532,83 +477,12 @@ let photos = [], photoIdx = 0;
 let prevCounts = { yours: 0, wife: 0 };
 
 const QUOTES = [
-  "Small steps every day add up to big change.",
+  "Small steps every day…",
   "Coffee first, chaos later.",
   "Today is a good day to try.",
   "Slow down, breathe, begin.",
-  "Little wins still count.",
-  "Progress, not perfection.",
-  "You don't have to be great to start.",
-  "One task at a time. That's enough.",
-  "Rest is productive too.",
-  "Doing something beats doing nothing.",
-  "The best time was yesterday. The next best is now.",
-  "Consistency beats intensity.",
-  "Be proud of how far you've come.",
-  "A little discipline goes a long way.",
-  "Make today count, gently.",
-  "You're closer than you think.",
-  "Done is better than perfect.",
-  "Start where you are, with what you have.",
-  "Every day is a fresh page.",
-  "Kindness first — to yourself too.",
-  "Big things start small.",
-  "Trust the process, keep moving.",
-  "Focus on what you can control.",
-  "Celebrate the small stuff.",
-  "You are allowed to take it slow.",
-  "Habits build the life you want.",
-  "Show up, even on the hard days.",
-  "The family that plans together, grows together.",
-  "Today's effort is tomorrow's ease.",
-  "Keep going. It's working.",
+  "Little wins still count."
 ];
-
-const FOOTER_QUOTES = [
-  { text: "Coffee. Code. Dreams.<br>Repeat. ☺", icon: "☕" },
-  { text: "Home is where the<br>Wi-Fi connects automatically.", icon: "🏠" },
-  { text: "Family first,<br>always.", icon: "💛" },
-  { text: "Small moments,<br>big memories.", icon: "📸" },
-  { text: "One day at a time,<br>one task at a time.", icon: "🌤️" },
-  { text: "Together is our<br>favourite place to be.", icon: "🤝" },
-  { text: "Good days start<br>with good mornings.", icon: "☀️" },
-  { text: "Grateful for the<br>little things today.", icon: "🍃" },
-];
-
-let quoteIdx = Math.floor(Math.random() * QUOTES.length);
-let footerIdx = Math.floor(Math.random() * FOOTER_QUOTES.length);
-
-function rotateHeaderQuote() {
-  const el = document.getElementById('quote');
-  el.style.opacity = 0;
-  setTimeout(() => {
-    quoteIdx = (quoteIdx + 1) % QUOTES.length;
-    el.textContent = '\u201c' + QUOTES[quoteIdx] + '\u201d';
-    el.style.opacity = 1;
-  }, 400);
-}
-
-function rotateFooterQuote() {
-  const strip = document.getElementById('quote-strip');
-  const textEl = document.getElementById('footer-quote');
-  const iconEl = document.getElementById('footer-quote-icon');
-  strip.style.opacity = 0;
-  setTimeout(() => {
-    footerIdx = (footerIdx + 1) % FOOTER_QUOTES.length;
-    textEl.innerHTML = FOOTER_QUOTES[footerIdx].text;
-    iconEl.textContent = FOOTER_QUOTES[footerIdx].icon;
-    strip.style.opacity = 1;
-  }, 400);
-}
-
-// Show a random one immediately on load
-document.getElementById('quote').textContent = '\u201c' + QUOTES[quoteIdx] + '\u201d';
-document.getElementById('footer-quote').innerHTML = FOOTER_QUOTES[footerIdx].text;
-document.getElementById('footer-quote-icon').textContent = FOOTER_QUOTES[footerIdx].icon;
-
-// Rotate on a timer — header quote every 5 min, footer quote every 8 min
-setInterval(rotateHeaderQuote, 5 * 60 * 1000);
-setInterval(rotateFooterQuote, 8 * 60 * 1000);
 
 /* ---------- Clock + Greeting ---------- */
 function updateClock() {
@@ -631,6 +505,8 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
+document.getElementById('quote').textContent =
+  '“' + QUOTES[Math.floor(Math.random()*QUOTES.length)] + '”';
 
 /* ---------- Weather ---------- */
 const WEATHER_ICONS = {
@@ -652,71 +528,27 @@ async function loadWeather() {
     document.getElementById('morning-weather').textContent =
       `${d.temp}°C · ${d.description} in ${d.city}`;
     setDot('sb-weather', true);
-    setInternetStatus(true);
   } catch(e) {
     console.error('Weather error', e);
     setDot('sb-weather', false);
-    setInternetStatus(false);
   }
-}
-
-/* Internet pill — driven off whether the weather API call (an external
-   fetch, not just local Flask) actually succeeded. A failed weather call
-   means the Pi has no real internet path out, even if local WiFi is up. */
-function setInternetStatus(ok) {
-  const el = document.getElementById('net-speed');
-  el.textContent = ok ? 'Connected' : 'Offline';
-  el.style.color = ok ? '' : 'var(--warn)';
 }
 loadWeather();
 setInterval(loadWeather, 30*60*1000);
 
-/* ---------- Pi's local IP — for SSH access from another device ---------- */
-async function loadNetworkInfo() {
-  try {
-    const r = await fetch('/api/network');
-    const d = await r.json();
-    if (d.ip) {
-      document.getElementById('pi-ip').textContent = d.ip;
-    } else {
-      document.getElementById('pi-ip').textContent = '';
-    }
-  } catch(e) {
-    console.error('Network info error', e);
-    document.getElementById('pi-ip').textContent = '';
-  }
-}
-loadNetworkInfo();
-setInterval(loadNetworkInfo, 60*60*1000);  // IP rarely changes on a home LAN — hourly is plenty
-
-/* ---------- 5-Day Forecast (real data from /api/forecast) ---------- */
-async function loadForecast() {
+/* simple 5-day forecast placeholders driven off nothing but today's icon;
+   replace with a real /api/forecast route if you add one server-side */
+function renderForecastPlaceholder() {
+  const days = ['Today','Thu','Fri','Sat','Sun'];
   const el = document.getElementById('forecast-row');
-  try {
-    const r = await fetch('/api/forecast');
-    const days = await r.json();
-    if (days.error) throw new Error(days.error);
-
-    el.innerHTML = days.map((d, i) => `
-      <div class="forecast-day">
-        <div class="d">${i === 0 ? 'Today' : d.day}</div>
-        <div class="ic">${WEATHER_ICONS[d.icon] || '⛅'}</div>
-        <div class="t">${d.temp}°</div>
-      </div>`).join('');
-  } catch(e) {
-    console.error('Forecast error', e);
-    // Fall back to a neutral placeholder row rather than leaving it blank
-    const fallbackDays = ['Today','--','--','--','--'];
-    el.innerHTML = fallbackDays.map(d => `
-      <div class="forecast-day">
-        <div class="d">${d}</div>
-        <div class="ic">⛅</div>
-        <div class="t">--°</div>
-      </div>`).join('');
-  }
+  el.innerHTML = days.map(d => `
+    <div class="forecast-day">
+      <div class="d">${d}</div>
+      <div class="ic">⛅</div>
+      <div class="t">--°</div>
+    </div>`).join('');
 }
-loadForecast();
-setInterval(loadForecast, 60*60*1000);  // refresh hourly — forecast changes slowly
+renderForecastPlaceholder();
 
 /* ---------- Todos ---------- */
 async function loadTodos() {
@@ -830,115 +662,13 @@ function updateSyncTime() {
 setInterval(updateSyncTime, 60000);
 updateSyncTime();
 
-/* ---------- On This Day — real world history facts from /api/today ---------- */
-async function loadOnThisDay() {
-  const el = document.getElementById('onthisday-list');
-  try {
-    const r = await fetch('/api/today');
-    const d = await r.json();
-    if (d.error || !d.events || d.events.length === 0) throw new Error(d.error || 'no events');
-
-    el.innerHTML = d.events.map(e => `
-      <div class="up-item">
-        <span class="up-icon">🌍</span>
-        <span class="up-text"><span class="up-year">${e.year}</span> — ${e.text}</span>
-      </div>`).join('');
-  } catch(e) {
-    console.error('On this day error', e);
-    el.innerHTML = '<div class="up-item"><span class="up-icon">🌍</span><span class="up-text">Unavailable right now</span></div>';
-  }
+/* CPU/RAM are cosmetic placeholders unless you add a /api/system route */
+function randomLoad() {
+  document.getElementById('sb-cpu').textContent = (10 + Math.random()*20).toFixed(0) + '%';
+  document.getElementById('sb-ram').textContent = (25 + Math.random()*15).toFixed(0) + '%';
 }
-loadOnThisDay();
-setInterval(loadOnThisDay, 3 * 60 * 60 * 1000);  // refresh every 3 hours — it's the same all day anyway
-
-/* ---------- Today's Specialty — real Hindu Panchang from /api/panchang ---------- */
-async function loadSpecialty() {
-  const el = document.getElementById('specialty-list');
-  const badge = document.getElementById('specialty-badge');
-
-  try {
-    const r = await fetch('/api/panchang');
-    const d = await r.json();
-    if (d.error) throw new Error(d.error);
-
-    badge.textContent = 'Panchang';
-
-    let html = '';
-
-    if (d.tithi) {
-      html += `
-        <div class="up-item">
-          <span class="up-icon">🌙</span>
-          <span class="up-text"><b>Tithi</b> — ${d.tithi}</span>
-        </div>`;
-    }
-
-    if (d.nakshatra) {
-      html += `
-        <div class="up-item">
-          <span class="up-icon">⭐</span>
-          <span class="up-text"><b>Nakshatra</b> — ${d.nakshatra}</span>
-        </div>`;
-    }
-
-    if (d.vaara) {
-      html += `
-        <div class="up-item">
-          <span class="up-icon">🕉️</span>
-          <span class="up-text"><b>Vaara</b> — ${d.vaara}</span>
-        </div>`;
-    }
-
-    // Festivals list is often empty on ordinary days — that's expected,
-    // not an error, so only show this line when something is actually there
-    if (d.festivals && d.festivals.length > 0) {
-      html += `
-        <div class="up-item">
-          <span class="up-icon">🎉</span>
-          <span class="up-text"><b>Festival</b> — ${d.festivals.join(', ')}</span>
-        </div>`;
-    }
-
-    // If every field came back empty, fall back to an honest message
-    // rather than showing a blank box
-    if (html === '') {
-      html = `
-        <div class="up-item">
-          <span class="up-icon">🕉️</span>
-          <span class="up-text" style="color:var(--muted)">No Panchang data available today</span>
-        </div>`;
-    }
-
-    el.innerHTML = html;
-  } catch(e) {
-    console.error('Panchang error', e);
-    badge.textContent = 'Unavailable';
-    el.innerHTML = `
-      <div class="up-item">
-        <span class="up-icon">🕉️</span>
-        <span class="up-text" style="color:var(--muted)">Panchang data unavailable right now</span>
-      </div>`;
-  }
-}
-loadSpecialty();
-setInterval(loadSpecialty, 60 * 60 * 1000);  // refresh hourly — tithi can change mid-day at a precise time, hourly is a reasonable balance
-
-/* ---------- Real CPU/RAM stats from /api/system ---------- */
-async function loadSystemStats() {
-  try {
-    const r = await fetch('/api/system');
-    const d = await r.json();
-    if (d.error) throw new Error(d.error);
-    document.getElementById('sb-cpu').textContent = d.cpu + '%';
-    document.getElementById('sb-ram').textContent = d.ram + '%';
-  } catch(e) {
-    console.error('System stats error', e);
-    document.getElementById('sb-cpu').textContent = '--%';
-    document.getElementById('sb-ram').textContent = '--%';
-  }
-}
-loadSystemStats();
-setInterval(loadSystemStats, 15000);  // every 15 seconds — cheap call, fine to poll often
+randomLoad();
+setInterval(randomLoad, 15000);
 
 /* ---------- Good Morning Banner ---------- */
 function showMorningBanner() {
