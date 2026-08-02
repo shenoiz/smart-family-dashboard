@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 from config import MQTT_BROKER, MQTT_PORT, MQTT_USERNAME, MQTT_PASSWORD
 
+
 def send_iot_command(topic: str, payload: str):
     """Publish an MQTT message to control a smart device"""
     try:
@@ -13,7 +14,7 @@ def send_iot_command(topic: str, payload: str):
         client.publish(topic, payload)
         client.disconnect()
 
-        print(f'IoT: {topic} -> {payload}')
+        print(f"IoT: {topic} -> {payload}")
 
     except Exception as e:
-        print(f'MQTT error: {e}')
+        print(f"MQTT error: {e}")
