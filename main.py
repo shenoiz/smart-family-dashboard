@@ -6,8 +6,7 @@ Run: python main.py
 import threading
 
 import telegram_bot
-#import sensor_manager
-#import scheduler
+import scheduler
 import google_drive_sync
 
 from app import app, socketio
@@ -17,8 +16,7 @@ if __name__ == '__main__':
 
     services = [
         ('Telegram bot', telegram_bot.start_bot),
-#        ('Sensor manager', sensor_manager.start),
-#        ('Scheduler', scheduler.start),
+        ('Scheduler', scheduler.start),
         ('Drive sync', google_drive_sync.start),
     ]
 

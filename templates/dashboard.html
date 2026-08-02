@@ -247,8 +247,8 @@ body {
 .her .add-btn { background: var(--her); }
 .him .add-btn { background: var(--him); }
 
-.todo-list { flex: 1; overflow-y: auto; display:flex; flex-direction:column; gap: 7px; }
-.todo-list::-webkit-scrollbar { width: 0; }
+.todo-list { flex: 1; overflow: hidden; position: relative; min-height: 0; }
+.todo-list-track { display:flex; flex-direction:column; gap: 7px; will-change: transform; transition: transform 1.2s ease-in-out; }
 
 .todo-item {
   display:flex; align-items:center; gap:10px;
@@ -314,7 +314,21 @@ body {
 .cal-day.out { color: var(--muted-2); opacity: 0.4; }
 .cal-day.today { background: var(--sky); color: #06101f; font-weight:700; }
 
-.upcoming-card { flex: 1; padding: 14px 16px; min-height:0; overflow:hidden; }
+.upcoming-card { flex: 1; padding: 14px 16px; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+
+/* Auto-scroll viewport pattern — a fixed-height clipping window with an
+   inner track that JS slowly translates upward, used for On This Day
+   and both todo lists once their content overflows the visible area. */
+.scroll-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+.scroll-track {
+  will-change: transform;
+  transition: transform 1.2s ease-in-out;
+}
 .upcoming-title { font-size: 0.85rem; font-weight:600; color: var(--muted); margin-bottom: 10px; }
 .up-item { display:flex; align-items:flex-start; gap:8px; margin-bottom: 8px; }
 .up-icon { font-size: 0.9rem; flex-shrink:0; margin-top:1px; }
@@ -453,10 +467,10 @@ body {
     </div>
     <button class="add-btn">+</button>
   </div>
-  <div class="todo-list" id="todos-wife"><div class="todo-empty">No tasks yet</div></div>
+  <div class="todo-list" id="todos-her"><div class="todo-empty">No tasks yet</div></div>
   <div class="todo-foot">
-    <span id="wife-pending">0 pending</span>
-    <span class="via">via Telegram 🤖 <span class="pulse-dot" id="dot-wife" style="display:none"></span></span>
+    <span id="her-pending">0 pending</span>
+    <span class="via">via Telegram 🤖 <span class="pulse-dot" id="dot-her" style="display:none"></span></span>
   </div>
 </div>
 
@@ -477,8 +491,10 @@ body {
         <div class="up-item"><span class="up-icon">📅</span><span class="up-text">Loading…</span></div>
       </div>
       <div class="upcoming-title" style="margin-top:12px">On This Day</div>
-      <div id="onthisday-list">
-        <div class="up-item"><span class="up-icon">🌍</span><span class="up-text">Loading…</span></div>
+      <div class="scroll-viewport" id="onthisday-viewport">
+        <div id="onthisday-list" class="scroll-track">
+          <div class="up-item"><span class="up-icon">🌍</span><span class="up-text">Loading…</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -497,10 +513,10 @@ body {
     </div>
     <button class="add-btn">+</button>
   </div>
-  <div class="todo-list" id="todos-yours"><div class="todo-empty">No tasks yet</div></div>
+  <div class="todo-list" id="todos-him"><div class="todo-empty">No tasks yet</div></div>
   <div class="todo-foot">
-    <span id="yours-pending">0 pending</span>
-    <span class="via">via Telegram 🤖 <span class="pulse-dot" id="dot-yours" style="display:none"></span></span>
+    <span id="him-pending">0 pending</span>
+    <span class="via">via Telegram 🤖 <span class="pulse-dot" id="dot-him" style="display:none"></span></span>
   </div>
 </div>
 
@@ -528,8 +544,82 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 <script>
 const socket = io();
+
+/* ================================================================
+   Slow auto-scroll engine — used for the todo lists and On This Day.
+   Only activates if content actually overflows its visible area.
+   Pattern: pause at top -> scroll down slowly -> pause at bottom
+            -> snap back to top -> repeat.
+   ================================================================ */
+const _scrollTimers = new WeakMap();  // tracks running loops per viewport, so re-registering (e.g. after a todo list refresh) cleanly restarts rather than stacking multiple loops
+
+function registerAutoScroll(viewportEl, trackEl) {
+  if (!viewportEl) return;
+  // If called with just one element (todo lists), find its inner track child
+  const track = trackEl || viewportEl.querySelector('.todo-list-track, .scroll-track');
+  if (!track) return;
+
+  // Stop any previous loop already running on this viewport before starting a new one
+  const existing = _scrollTimers.get(viewportEl);
+  if (existing) clearTimeout(existing);
+  track.style.transition = 'none';
+  track.style.transform = 'translateY(0px)';
+
+  // Let layout settle for one frame before measuring heights
+  requestAnimationFrame(() => {
+    const viewportHeight = viewportEl.clientHeight;
+    const trackHeight = track.scrollHeight;
+    const overflow = trackHeight - viewportHeight;
+
+    // Nothing to scroll — content already fits, leave it static
+    if (overflow <= 4) return;
+
+    const PIXELS_PER_STEP = 1;
+    const STEP_INTERVAL_MS = 60;      // slow, gentle motion
+    const PAUSE_AT_TOP_MS = 3000;
+    const PAUSE_AT_BOTTOM_MS = 2500;
+
+    let position = 0;
+    let direction = 'down';
+
+    function step() {
+      if (direction === 'down') {
+        position += PIXELS_PER_STEP;
+        if (position >= overflow) {
+          position = overflow;
+          track.style.transition = 'transform 0.6s ease';
+          track.style.transform = `translateY(-${position}px)`;
+          const t = setTimeout(() => {
+            direction = 'reset';
+            step();
+          }, PAUSE_AT_BOTTOM_MS);
+          _scrollTimers.set(viewportEl, t);
+          return;
+        }
+        track.style.transition = 'none';
+        track.style.transform = `translateY(-${position}px)`;
+        const t = setTimeout(step, STEP_INTERVAL_MS);
+        _scrollTimers.set(viewportEl, t);
+      } else {
+        // Snap back to top, then pause before scrolling down again
+        position = 0;
+        track.style.transition = 'transform 0.8s ease';
+        track.style.transform = 'translateY(0px)';
+        const t = setTimeout(() => {
+          direction = 'down';
+          step();
+        }, PAUSE_AT_TOP_MS);
+        _scrollTimers.set(viewportEl, t);
+      }
+    }
+
+    const startTimer = setTimeout(step, PAUSE_AT_TOP_MS);
+    _scrollTimers.set(viewportEl, startTimer);
+  });
+}
+
 let photos = [], photoIdx = 0;
-let prevCounts = { yours: 0, wife: 0 };
+let prevCounts = { him: 0, her: 0 };
 
 const QUOTES = [
   "Small steps every day add up to big change.",
@@ -723,8 +813,8 @@ async function loadTodos() {
   try {
     const r = await fetch('/api/todos');
     const t = await r.json();
-    renderTodos('yours', t.yours || []);
-    renderTodos('wife',  t.wife  || []);
+    renderTodos('him', t.him || []);
+    renderTodos('her', t.her || []);
     setDot('sb-telegram', true);
   } catch(e) {
     console.error('Todo error', e);
@@ -744,14 +834,17 @@ function renderTodos(who, items) {
   prevCounts[who] = pendingCount;
 
   if (items.length === 0) {
-    el.innerHTML = '<div class="todo-empty">No tasks yet</div>';
+    el.innerHTML = '<div class="todo-list-track"><div class="todo-empty">No tasks yet</div></div>';
+    registerAutoScroll(el);
     return;
   }
-  el.innerHTML = items.map(t => `
+  const itemsHtml = items.map(t => `
     <div class="todo-item ${t.done ? 'done' : ''}">
       <div class="chk">${t.done ? '✓' : ''}</div>
       <span class="todo-text">${t.text}</span>
     </div>`).join('');
+  el.innerHTML = `<div class="todo-list-track">${itemsHtml}</div>`;
+  registerAutoScroll(el);
 }
 loadTodos();
 setInterval(loadTodos, 10000);
@@ -833,6 +926,7 @@ updateSyncTime();
 /* ---------- On This Day — real world history facts from /api/today ---------- */
 async function loadOnThisDay() {
   const el = document.getElementById('onthisday-list');
+  const viewport = document.getElementById('onthisday-viewport');
   try {
     const r = await fetch('/api/today');
     const d = await r.json();
@@ -847,6 +941,7 @@ async function loadOnThisDay() {
     console.error('On this day error', e);
     el.innerHTML = '<div class="up-item"><span class="up-icon">🌍</span><span class="up-text">Unavailable right now</span></div>';
   }
+  registerAutoScroll(viewport, el);
 }
 loadOnThisDay();
 setInterval(loadOnThisDay, 3 * 60 * 60 * 1000);  // refresh every 3 hours — it's the same all day anyway

@@ -28,8 +28,8 @@ def get_todos():
             return jsonify(json.load(f))
     except Exception:
         return jsonify({
-            'yours': [],
-            'wife': []
+            'him': [],
+            'her': []
         })
 
 
