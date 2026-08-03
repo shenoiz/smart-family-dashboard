@@ -1,4 +1,4 @@
-![CI](https://github.com/YOUR_USERNAME/smart-family-dashboard/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/shenoiz/smart-family-dashboard/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-2.3-black?logo=flask)
 ![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-Zero%202W-C51A4A?logo=raspberrypi&logoColor=white)
