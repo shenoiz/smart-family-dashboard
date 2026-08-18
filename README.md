@@ -1,49 +1,55 @@
 ![CI](https://github.com/shenoiz/smart-family-dashboard/actions/workflows/ci.yml/badge.svg)
+![Deploy](https://github.com/shenoiz/smart-family-dashboard/actions/workflows/deploy.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-2.3-black?logo=flask)
+![Flask](https://img.shields.io/badge/Flask-black?logo=flask)
 ![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-Zero%202W-C51A4A?logo=raspberrypi&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-In%20Progress-orange)
+![Status](https://img.shields.io/badge/Status-Live-brightgreen)
 
 # 🏠 Smart Family Dashboard
 
 > A Raspberry Pi Zero 2W powered smart home dashboard for our family —
-> built entirely from scratch as my first hardware + software project.
+> built entirely from scratch, with zero prior coding experience, as a
+> complete hardware + software + DevOps project.
 
-![Dashboard Preview](docs/dashboard-photo.jpg)
+![Architecture](docs/architecture.svg)
 
 ---
 
 ## About
 
 This is a wall-mounted smart dashboard running on a Raspberry Pi Zero 2W
-connected to a 15" display. It shows live weather with a 5-day forecast, a
-shared Him/Her to-do list managed via Telegram from our phones, a rotating
+connected to a 15" display. It shows live weather with a 5-day forecast,
+a shared Him/Her to-do list managed entirely via Telegram, a rotating
 slideshow of family photos pulled automatically from Google Drive, today's
-Hindu Panchang (tithi, nakshatra, vaara), and world history facts for the day.
+Hindu Panchang (tithi, nakshatra, vaara, Ekadashi detection), and real
+world history facts for the day.
 
 Everything is controlled from Telegram: adding and completing tasks,
-controlling smart home devices, and receiving Good Morning updates.
+and receiving a daily Good Morning cue with sound. The entire project is
+deployed automatically — pushing code to GitHub tests it, and a passing
+merge to `main` deploys straight to the Pi over SSH, with a Telegram
+message confirming the deploy.
 
-The entire project is deployed automatically — pushing code to GitHub triggers
-tests, and a passing merge to `main` auto-deploys to the Pi via SSH.
+This project was built end-to-end by someone with **no prior coding
+experience** — every piece, from the first `ssh` command to a working
+CI/CD pipeline, was learned and built during this project.
 
 ---
 
 ## Features
 
 - 📋 **Shared Him/Her to-do lists** — managed via Telegram bot (`/add`, `/done`, `/list`, `/clear`)
-- 🌤️ **Live weather + 5-day forecast** — fetches from OpenWeatherMap, auto-refreshes
-- 📸 **Family photo slideshow** — auto-syncs from a shared Google Drive folder, fixed-frame display regardless of photo orientation
-- 🕉️ **Hindu Panchang** — today's tithi, nakshatra, vaara, and Ekadashi detection via Prokerala API
+- 🌤️ **Live weather + 5-day forecast** — OpenWeatherMap, auto-refreshing
+- 📸 **Family photo slideshow** — auto-syncs from a shared Google Drive folder, fixed-frame display so photo orientation never changes the layout
+- 🕉️ **Hindu Panchang** — today's tithi, nakshatra, vaara, and Ekadashi detection, via the Prokerala API
 - 🌍 **On This Day** — real world history facts pulled from Wikipedia's public API
-- ☀️ **Good Morning routine** — banner + audio cheer every day at 7:05 AM
-- 🔊 **Audio alerts** — plays a sound when a new task is added
-- 🏠 **Smart home control** — plain-text MQTT commands via Telegram (`lights on`, `fan off`)
-- 🌙 **Auto shutdown** — Pi shuts down at 11 PM, back on at 7 AM
-- 📡 **Live system status** — CPU/RAM usage and local IP shown on-screen for quick SSH access
-- 🔄 **Auto-scrolling lists** — todo lists slowly scroll when content overflows the visible area
-- 🤖 **Full CI/CD pipeline** — GitHub Actions tests + auto-deploys on every merge to `main`
+- ☀️ **Good Morning routine** — daily cue with sound at 7:05 AM
+- 🔊 **Audio alerts** — plays a sound when a new task is added, via a real speaker on the Pi
+- 📡 **Live system status on-screen** — CPU, RAM, and the Pi's local IP address, so it can be reached over SSH at a glance without hunting for it
+- 🔄 **Auto-scrolling to-do lists** — long lists scroll slowly on their own when they overflow the visible area
+- 🖥️ **Boots straight to a full-screen kiosk display** — no keyboard, no mouse, no manual login, every time the Pi powers on
+- 🤖 **Full CI/CD pipeline** — GitHub Actions tests every change and deploys automatically on merge to `main`
 
 ---
 
@@ -53,195 +59,120 @@ tests, and a passing merge to `main` auto-deploys to the Pi via SSH.
 | Component | Purpose |
 |-----------|---------|
 | Raspberry Pi Zero 2W | Main compute unit |
-| 15" HDMI LCD Display | Dashboard display |
-| USB Sound Card + Speaker | Audio alerts and Good Morning music |
+| 15" HDMI display | The dashboard screen |
+| USB sound card + speaker | Audio cues (Pi Zero has no built-in audio out) |
+| Relay module (planned/optional) | Simulates a press of the display's physical power button on a schedule |
 
 ### Software
 | Technology | Role |
 |-----------|------|
 | Python 3.11 | All backend services |
-| Flask + Flask-SocketIO | Local web server + real-time browser push |
-| python-telegram-bot | Telegram bot — todos and IoT commands |
-| Google Drive API | Photo sync via service account (no OAuth popup) |
-| OpenWeatherMap API | Live weather + 5-day forecast |
-| Prokerala API | Hindu Panchang — tithi, nakshatra, vaara |
-| Wikipedia REST API | "On This Day" world history facts |
-| paho-mqtt | Smart home device control |
-| pygame | Audio playback |
-| psutil | Real-time CPU/RAM stats for the dashboard |
-| schedule | Timed jobs — good morning, auto shutdown |
+| Flask + Flask-SocketIO | Local web server and real-time browser push |
+| python-telegram-bot | Telegram bot — todo commands |
+| Google Drive API | Photo sync via a service account (no login popup on the Pi) |
+| OpenWeatherMap API | Live weather and 5-day forecast |
+| Prokerala API | Hindu Panchang, via OAuth2 client credentials |
+| Wikipedia REST API | On This Day world history facts |
+| pygame + ALSA | Audio playback |
+| psutil | Real CPU/RAM stats shown on-screen |
+| schedule | Timed jobs — Good Morning, nightly display control |
 
 ### Infrastructure
 | Technology | Role |
 |-----------|------|
-| systemd | Auto-start service on every boot |
-| GitHub Actions | CI (lint + tests) and CD (deploy to Pi) |
-| Tailscale | Secure network tunnel for remote deployment |
-| Epiphany (WebKitGTK) | Lightweight kiosk browser — chosen over Chromium for the Pi Zero's 512MB RAM |
+| systemd | Runs the Flask app as a service, restarts it if it ever crashes |
+| lightdm + Openbox | Manages the graphical session and auto-login, so the Pi boots straight to a working desktop with no manual login |
+| Epiphany (WebKitGTK) | The kiosk browser — chosen over Chromium, which is too heavy for the Pi Zero's 512MB of RAM |
+| wmctrl + xdotool | Force the browser window into a genuine full screen with no address bar, automatically on every boot |
+| GitHub Actions | CI (lint + tests) and CD (deploy to the Pi) |
+| Tailscale | A private network tunnel used only by the deploy pipeline, so GitHub's servers can reach the Pi without opening anything on the home router |
 
 ---
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────┐
-│             YOUR PHONE (Telegram)           │
-│   /add him Buy milk  ·  /done her 0         │
-│   lights on  ·  fan off                     │
-└───────────────────┬─────────────────────────┘
-                    │ Telegram API (polling)
-┌───────────────────▼─────────────────────────┐
-│           RASPBERRY PI ZERO 2W              │
-│                                             │
-│  ┌─────────────────┐  ┌─────────────────┐  │
-│  │  Flask Server   │  │  Telegram Bot   │  │
-│  │  :5000          │◄─│  todos + IoT    │  │
-│  └────────┬────────┘  └─────────────────┘  │
-│           │                                 │
-│  ┌────────▼────────┐  ┌─────────────────┐  │
-│  │  Epiphany       │  │  Scheduler      │  │
-│  │  (kiosk mode)   │  │  (good morning, │  │
-│  │                 │  │   auto shutdown)│  │
-│  └─────────────────┘  └─────────────────┘  │
-│                                             │
-│  ┌─────────────────────────────────────┐   │
-│  │  Drive Sync · Audio · Weather ·     │   │
-│  │  Panchang · On This Day             │   │
-│  └─────────────────────────────────────┘   │
-└─────────────────────────────────────────────┘
-         │                        │
-    15" Display             Smart Home
-    (dashboard UI)    (MQTT → lights, fan, TV)
-```
+See [`docs/architecture.svg`](docs/architecture.svg) for the full diagram. In short:
+
+- Your phone talks to the **Telegram Bot**, which reads and writes `data/todos.json` directly.
+- **Flask** serves the dashboard page and a set of `/api/...` endpoints; it is the only thing that calls external APIs (weather, Panchang, Wikipedia, Drive) — the browser never talks to the internet directly.
+- The **kiosk display chain** (lightdm → Openbox → Epiphany) shows the dashboard full screen, with no manual steps after power-on.
+- The dashboard page polls Flask every 10 seconds and also receives instant updates over SocketIO the moment a Telegram command changes something.
+- A **scheduler thread** handles the daily Good Morning cue and the nightly display routine.
+- **GitHub Actions** tests every change and, on merge to `main`, connects to the Pi over Tailscale and deploys automatically.
 
 ---
 
 ## CI/CD Pipeline
 
-This project uses GitHub Actions for automated testing and deployment.
-
 ### Continuous Integration — runs on every Pull Request
 
-1. Spins up a clean Ubuntu environment on GitHub's servers
-2. Installs all Python dependencies from `requirements.txt`
-3. Runs `flake8` for code style checking
-4. Runs `black --check` for consistent formatting
-5. Scans source files for accidentally hardcoded secrets
-6. Runs `pytest` unit tests
+1. Installs Python dependencies from `requirements.txt`
+2. Runs `flake8` for code style
+3. Runs `pytest` — unit tests covering the to-do logic and the Ekadashi detection rule
 
 If any step fails, the PR is blocked from merging.
 
 ### Continuous Deployment — runs on merge to `main`
 
-1. GitHub Actions SSH's into the Pi via Tailscale (private network tunnel)
-2. Runs `git pull origin main`
-3. Runs `pip install -r requirements.txt`
-4. Restarts the `dashboard` systemd service
-5. Sends a Telegram message confirming the deploy
+1. GitHub Actions connects to the Pi over Tailscale
+2. SSHes in and runs `git pull`, then `pip install -r requirements.txt`
+3. Restarts the `dashboard` systemd service
+4. Sends a Telegram message confirming the deploy
 
-**Result:** Code change on laptop → tested → live on the Pi within ~2 minutes, zero manual steps.
+A push to `main` is live on the physical Pi within about two minutes, with no manual step.
 
----
+### Branching
 
-## System Dependencies
-
-`requirements.txt` only lists **Python packages** — libraries imported directly
-in the `.py` files. It intentionally does not include system-level tools
-installed via `apt`, since `pip` has no way to install or track those. This
-project depends on both, and a full rebuild needs both layers.
-
-### Installed via `apt` (system packages)
-
-| Package | Purpose |
-|---------|---------|
-| `git` | Version control |
-| `python3-pip`, `python3-venv` | Python environment tooling |
-| `xserver-xorg`, `x11-xserver-utils`, `xinit`, `openbox` | Minimal X11 display server + window manager for kiosk mode |
-| `epiphany-browser` | Lightweight WebKitGTK kiosk browser — used instead of Chromium, which is too heavy for the Pi Zero's 512MB RAM |
-| `unclutter` | Hides the mouse cursor on the kiosk display |
-| `python3-pygame` | System-level pygame dependencies for audio playback |
-| `mpg123`, `alsa-utils` | Audio decoding and ALSA configuration tools |
-| `sox`, `libsox-fmt-mp3` | Used to generate/verify test audio files locally without downloading from third parties |
-| `htop`, `nano` | General admin convenience |
-
-Install these with:
-```bash
-sudo apt update
-sudo apt install -y git python3-pip python3-venv \
-  xserver-xorg x11-xserver-utils xinit openbox \
-  epiphany-browser unclutter \
-  python3-pygame mpg123 alsa-utils \
-  sox libsox-fmt-mp3 htop nano
-```
-
-### Installed via `pip` (Python packages)
-
-See [`requirements.txt`](requirements.txt) — generated directly from the
-working environment with `pip freeze > requirements.txt` to guarantee it
-matches what's actually installed, rather than a hand-maintained list that
-can drift out of sync.
-
-### Why the split matters
-
-A common beginner mistake (made once during this build) is assuming
-`pip list` should show everything the project depends on — including the
-browser. It won't. System tools like Epiphany, `sox`, and `tmux` are tracked
-by `dpkg`/`apt`, not `pip`, because they aren't Python libraries. Keeping
-this list here means a full rebuild only needs two commands — the `apt`
-block above, then `pip install -r requirements.txt` — instead of
-re-discovering missing system tools one broken feature at a time.
+- `main` is the deployable branch — every real change goes through a Pull Request, never a direct push.
+- Feature branches: `feature/*`, `fix/*`, `chore/*`.
+- See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full workflow.
 
 ---
 
-> 📄 Full step-by-step build guide: [`docs/build-guide.pdf`](docs/build-guide.pdf)
+## Getting Started
 
 ### Prerequisites
 
-- Raspberry Pi Zero 2W with Raspberry Pi OS Lite (64-bit)
+- Raspberry Pi Zero 2W, Raspberry Pi OS
 - Python 3.11+
-- Telegram account and bot token (from [@BotFather](https://t.me/botfather))
-- [OpenWeatherMap](https://openweathermap.org) free API key
-- Google Cloud service account with Drive API enabled
+- A Telegram bot token from [@BotFather](https://t.me/botfather)
+- A free [OpenWeatherMap](https://openweathermap.org) API key
+- A [Prokerala](https://api.prokerala.com) account for Panchang data
+- A Google Cloud service account with the Drive API enabled
 
-### Quick Setup
+### Setup
 
 ```bash
-# Clone the repo
-git clone git@github.com:YOUR_USERNAME/smart-family-dashboard.git
+git clone git@github.com:shenoiz/smart-family-dashboard.git
 cd smart-family-dashboard
 
-# Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
 
-# Configure secrets
 cp .env.example .env
-nano .env   # fill in your API keys and credentials
+nano .env   # fill in your keys
 
-# Run
 python main.py
 ```
 
-Open `http://localhost:5000` in your browser.
+Open `http://localhost:5000` in a browser to see it running.
 
-### Environment Variables
-
-See [`.env.example`](.env.example) for the full list of required variables.
+For the full physical build — wiring, boot automation, and the kiosk
+display setup — see [`docs/SYSTEM_NOTES.md`](docs/SYSTEM_NOTES.md). That
+document captures every real fix from the actual build, including the
+non-obvious ones.
 
 ### Telegram Commands
 
 | Command | Example | What it does |
-|---------|---------|-------------|
-| `/add him <task>` | `/add him Buy milk` | Adds to Him's list, updates screen instantly |
+|---------|---------|---------------|
+| `/add him <task>` | `/add him Buy milk` | Adds to Him's list, updates the screen instantly |
 | `/add her <task>` | `/add her Book dentist` | Adds to Her's list |
 | `/done him <number>` | `/done him 0` | Marks Him's item 0 as done |
 | `/done her <number>` | `/done her 2` | Marks Her's item 2 as done |
 | `/list` | `/list` | Shows both lists with item numbers |
-| `/clear all` | `/clear all` | Removes completed items |
-| `<device command>` | `lights on` | Sends MQTT command to smart device |
+| `/clear all` | `/clear all` | Removes completed items from both lists |
 
 ---
 
@@ -250,28 +181,27 @@ See [`.env.example`](.env.example) for the full list of required variables.
 ```
 smart-family-dashboard/
 ├── .github/workflows/
-│   ├── ci.yml            # lint + tests on every PR
-│   └── deploy.yml        # auto-deploy to Pi on merge to main
+│   ├── ci.yml              # lint + tests on every PR
+│   └── deploy.yml          # deploy to the Pi on merge to main
 ├── docs/
-│   ├── architecture.png
-│   ├── dashboard-photo.jpg
-│   └── build-guide.pdf
-├── static/               # CSS, JS, sound files
+│   ├── architecture.svg    # the diagram at the top of this file
+│   └── SYSTEM_NOTES.md     # detailed system-level build notes
+├── static/                 # sound files used by audio_manager.py
 ├── templates/
-│   └── dashboard.html    # the display UI
+│   └── dashboard.html      # the display itself — HTML, CSS, and JS in one file
 ├── tests/
-│   └── test_todos.py
-├── app.py                # Flask server + API routes
-├── audio_manager.py      # sound alerts
-├── config.py             # reads from .env
-├── google_drive_sync.py  # Drive photo downloader
-├── iot_controller.py     # MQTT smart home commands
-├── main.py               # starts all services
-├── scheduler.py          # good morning + auto shutdown
-├── telegram_bot.py       # Telegram command handler
+│   └── test_todos.py       # unit tests for the to-do logic and Ekadashi detection
+├── app.py                  # Flask server and every /api/ route
+├── audio_manager.py        # plays sound cues
+├── config.py                # reads every setting from .env
+├── google_drive_sync.py    # downloads photos from the shared Drive folder
+├── main.py                  # starts every background service, then Flask
+├── scheduler.py             # Good Morning cue, nightly display routine
+├── telegram_bot.py          # the Telegram bot — all to-do commands
 ├── requirements.txt
-├── .env.example          # config template (never commit .env)
+├── .env.example
 ├── .gitignore
+├── CONTRIBUTING.md
 ├── LICENSE
 └── README.md
 ```
@@ -280,46 +210,83 @@ smart-family-dashboard/
 
 ## What I Learned
 
-I started this project as a complete beginner with no prior coding experience.
-Here is what building it taught me:
+I started this project with no prior coding experience. Here is what
+building it actually taught me:
 
-- **Linux & the terminal** — navigating files, managing processes with systemd, SSH as a daily workflow
-- **Python** — from variables and functions through to threading, file I/O, JSON, and calling external APIs
-- **Web fundamentals** — how HTTP works, what a web server actually does, and how Flask ties Python to a browser
-- **Real-time communication** — how SocketIO creates a live connection so the screen updates the moment a Telegram message is sent
-- **APIs** — fetching data from OpenWeatherMap, communicating with Telegram's API, downloading files from Google Drive programmatically
-- **Hardware** — GPIO, UART serial communication, wiring and debugging sensors (including diagnosing and ultimately retiring a faulty motion sensor), understanding the Pi's pin layout
-- **Git & GitHub** — branching, pull requests, commit conventions, managing code across two machines
-- **CI/CD** — writing YAML workflows, what automated testing means in practice, and deploying to physical hardware remotely
+- **Linux and the terminal** — navigating the filesystem, managing
+  services with systemd, SSH as a daily tool, reading kernel and X11
+  logs to actually diagnose a problem instead of guessing
+- **Python** — variables and functions through to threading, file I/O,
+  JSON, and calling external APIs
+- **Web fundamentals** — what a web server actually does, how Flask
+  connects Python to a browser, and how SocketIO pushes updates without
+  a page refresh
+- **APIs** — OpenWeatherMap, Telegram's bot API, Google Drive's service
+  account flow, and Prokerala's OAuth2 client-credentials flow
+- **Linux graphics and display management** — the difference between a
+  window manager and a display server, why a bare `startx` session has
+  no window manager at all, VT (virtual terminal) permissions, and why
+  `lightdm` exists as a real tool rather than "extra weight" — a lesson
+  learned the hard way after a full day of hand-built alternatives
+- **Real hardware debugging** — wiring a sensor, isolating a fault down
+  to the component itself, and making the call to drop a feature rather
+  than keep it in as something unreliable
+- **Git and GitHub** — branching, Pull Requests, commit conventions, and
+  the discipline of protecting `main` so nothing goes out untested
+- **CI/CD** — writing real GitHub Actions workflows, understanding what
+  automated testing catches that manual testing misses, and deploying to
+  a physical device automatically, not just a cloud server
 
-The hardest part was understanding how all the pieces connect simultaneously — Flask serving a webpage to the kiosk browser on the same Pi, while a Telegram bot thread updates the data that page shows in real time. That mental model took the longest to build.
+The single hardest part of this whole project was not any one bug — it
+was the Epiphany kiosk boot chain. Getting a browser to launch
+automatically, take over the full screen, and stay that way, on a
+minimal Linux graphics stack with no window manager, took a full day and
+went through several completely different approaches before the right
+one (lightdm + Openbox + wmctrl + a properly-timed xdotool sequence)
+actually held up. The detailed story of exactly what was tried, what
+failed, and why, is written up in
+[`docs/SYSTEM_NOTES.md`](docs/SYSTEM_NOTES.md) — including the parts
+that look strange on paper (like deliberately nudging the mouse cursor a
+couple of centimeters after the fullscreen sequence) but were the actual
+fix, arrived at by testing on the real hardware rather than by theory.
 
 ---
 
 ## Roadmap
 
-- [x] Project structure and base Flask server
-- [x] Dashboard UI — clock, weather, todo lists, photo slideshow
-- [x] Telegram bot — `/add`, `/done`, `/list`, `/clear`
+- [x] Flask server, dashboard UI, photo slideshow, weather
+- [x] Telegram bot with Him/Her to-do lists
 - [x] Google Drive photo sync
-- [x] Audio alerts and Good Morning routine
-- [x] IoT MQTT device control
-- [x] 5-day weather forecast
-- [x] Hindu Panchang + On This Day world facts
+- [x] Hindu Panchang + On This Day
 - [x] Live CPU/RAM/IP status on-screen
-- [x] Switched Chromium → Epiphany for lower memory usage on Pi Zero
-- [x] GitHub Actions CI pipeline
-- [x] Auto-deploy CD pipeline to Pi
-- [ ] Physical build — mount display on wall
+- [x] Full CI/CD pipeline — GitHub Actions test and deploy automatically
+- [x] Fully automatic kiosk boot — no manual login, no manual browser launch
+- [x] Persistent logging, so any future issue leaves real evidence
+- [x] Self-healing 30-minute page reload to clear browser memory over time
+- [ ] Physical relay wiring for true nightly display power-off with a morning wake
+- [ ] Wall mount and final enclosure
 
-**Note on presence detection:** an RCWL-0516 radar sensor was wired up to
-auto turn the screen on/off based on room presence. After isolating and
-testing it directly against raw GPIO (ruling out interference, wiring, and
-code issues one at a time), the unit itself proved unreliable and was
-removed from the project rather than kept as a flaky feature. The screen
-now stays on continuously, with the existing scheduled shutdown handling
-overnight power-down. Revisiting this with a different sensor is a
-possible future addition.
+**Dropped during the build, on purpose:**
+- An RCWL-0516 motion sensor for automatic screen wake — wired up,
+  tested in isolation down to the raw GPIO level, and found to be an
+  unreliable unit. Removed rather than kept as a flaky feature. See
+  `docs/SYSTEM_NOTES.md` for the full diagnosis.
+- An IoT/MQTT smart-home command feature — scaffolded early on but never
+  actually wired to real devices or tested, and removed cleanly before
+  launch rather than shipped half-finished.
 
 ---
-_Built with ❤️ — and many evenings of learning_
+
+## About Me
+
+Built as my first real software and hardware project, entirely from
+zero prior experience — Python, Linux, Git, and a full CI/CD pipeline,
+learned by building something my family actually uses every day.
+
+🐙 [github.com/shenoiz](https://github.com/shenoiz)
+
+---
+
+_Built with a lot of patience, several full reboots, and one very
+persistent debugging session that ended in a browser window that finally,
+correctly, stayed full screen._
