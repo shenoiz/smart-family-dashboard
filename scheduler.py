@@ -1,6 +1,5 @@
 import schedule
 import time
-import subprocess
 import RPi.GPIO as GPIO
 
 from audio_manager import play_sound
