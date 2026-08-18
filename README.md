@@ -53,6 +53,8 @@ CI/CD pipeline, was learned and built during this project.
 
 ---
 
+![Dashboard Snapshot](docs/dashboard-photo.jpg)
+
 ## Tech Stack
 
 ### Hardware
@@ -186,6 +188,7 @@ smart-family-dashboard/
 ├── docs/
 │   ├── architecture.svg    # the diagram at the top of this file
 │   └── SYSTEM_NOTES.md     # detailed system-level build notes
+|   └── dashboard-photo.jpg # dashboard html page snapshot
 ├── static/                 # sound files used by audio_manager.py
 ├── templates/
 │   └── dashboard.html      # the display itself — HTML, CSS, and JS in one file
