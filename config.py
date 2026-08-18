@@ -21,18 +21,6 @@ SLIDESHOW_INTERVAL_SECONDS = 3600
 # Schedule
 SHUTDOWN_TIME = os.getenv("SHUTDOWN_TIME", "23:00")
 GOOD_MORNING_TIME = os.getenv("GOOD_MORNING_TIME", "07:05")
-# MQTT / IoT
-MQTT_BROKER = os.getenv("MQTT_BROKER", "192.168.1.100")
-MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
-MQTT_USERNAME = os.getenv("MQTT_USERNAME")
-MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
-# IoT command map: telegram text -> (mqtt_topic, payload)
-IOT_DEVICES = {
-    "lights on": ("home/living/lights", "ON"),
-    "lights off": ("home/living/lights", "OFF"),
-    "fan on": ("home/bedroom/fan", "ON"),
-    "fan off": ("home/bedroom/fan", "OFF"),
-}
 # ProKerala astrocalender API
 PROKERALA_CLIENT_ID = os.getenv("PROKERALA_CLIENT_ID")
 PROKERALA_CLIENT_SECRET = os.getenv("PROKERALA_CLIENT_SECRET")

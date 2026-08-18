@@ -6,7 +6,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS, IOT_DEVICES
+from config import TELEGRAM_BOT_TOKEN, TELEGRAM_ALLOWED_USERS
 
 TODO_FILE = "data/todos.json"
 
@@ -125,17 +125,7 @@ async def cmd_clear(update, ctx):
 async def handle_text(update, ctx):
     if not is_allowed(update):
         return
-    text = update.message.text.lower().strip()
-    if text in IOT_DEVICES:
-        from iot_controller import send_iot_command
-        from audio_manager import play_sound
-
-        topic, payload = IOT_DEVICES[text]
-        send_iot_command(topic, payload)
-        play_sound("alert")
-        await update.message.reply_text(f"Done: {text}")
-    else:
-        await update.message.reply_text("Commands: /add /done /list /clear")
+    await update.message.reply_text("Commands: /add /done /list /clear")
 
 
 def start_bot():

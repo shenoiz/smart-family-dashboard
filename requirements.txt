@@ -23,7 +23,6 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.3
 oauthlib==3.3.1
-paho-mqtt==2.1.0
 pillow==12.2.0
 proto-plus==1.28.0
 protobuf==7.35.0
