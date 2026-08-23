@@ -140,31 +140,6 @@ def get_system():
 _today_cache = {"date": None, "data": None}
 
 
-#@app.route("/api/today")
-#def get_today():
-#    today = dt.now().strftime("%m/%d")
-#    global _today_cache
-
-    # Return cached result if we already fetched it today
-#    if _today_cache["date"] == today and _today_cache["data"]:
-#        return jsonify(_today_cache["data"])
-#    try:
-#        month, day = today.split("/")
-#        url = f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/selected/{month}/{day}"
-#        r = requests.get(url, timeout=6, headers={"User-Agent": "SmartDashboard/1.0"})
-#        events = r.json().get("selected", [])[:3]  # top 3 highlights
-
-#        result = {
-#            "events": [
-#                {"year": e.get("year"), "text": e.get("text", "")[:90]} for e in events
-#            ]
-#        }
-#        _today_cache = {"date": today, "data": result}
-#        return jsonify(result)
-#    except Exception as e:
-#        return jsonify({"events": [], "error": str(e)}), 500
-
-
 @app.route('/api/today')
 def get_today():
     today = dt.now().strftime('%m/%d')
@@ -207,7 +182,6 @@ def get_today():
         return jsonify(result)
     except Exception as e:
         return jsonify({'events': [], 'error': str(e)}), 500
-
 
 
 # ── Prokerala OAuth2 token cache ─────────────────────────────────────────
