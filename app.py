@@ -140,29 +140,48 @@ def get_system():
 _today_cache = {"date": None, "data": None}
 
 
-@app.route("/api/today")
+@app.route('/api/today')
 def get_today():
-    today = dt.now().strftime("%m/%d")
+    today = dt.now().strftime('%m/%d')
     global _today_cache
 
-    # Return cached result if we already fetched it today
-    if _today_cache["date"] == today and _today_cache["data"]:
-        return jsonify(_today_cache["data"])
+    if _today_cache['date'] == today and _today_cache['data']:
+        return jsonify(_today_cache['data'])
+
     try:
-        month, day = today.split("/")
-        url = f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/selected/{month}/{day}"
-        r = requests.get(url, timeout=6, headers={"User-Agent": "SmartDashboard/1.0"})
-        events = r.json().get("selected", [])[:3]  # top 3 highlights
+        month, day = today.split('/')
+        url = f'https://en.wikipedia.org/api/rest_v1/feed/onthisday/selected/{month}/{day}'
+        r = requests.get(url, timeout=6, headers={'User-Agent': 'SmartDashboard/1.0'})
+        raw_events = r.json().get('selected', [])
+
+        # Filter out war/violence/death-heavy content — not appropriate
+        # for a family display. Better to show fewer, gentler facts than
+        # a grim one every single day.
+        BLOCKED_WORDS = [
+            'killed', 'dead', 'death', 'war', 'bomb', 'attack', 'massacre',
+            'assassinat', 'terror', 'genocide', 'invasion', 'execution',
+            'shooting', 'explosion', 'coup', 'battle', 'casualties',
+            'wounded', 'militant', 'airstrike', 'conflict', 'uprising'
+        ]
+
+        safe_events = []
+        for e in raw_events:
+            text = e.get('text', '').lower()
+            if not any(word in text for word in BLOCKED_WORDS):
+                safe_events.append(e)
+
+        events = safe_events[:3]
 
         result = {
-            "events": [
-                {"year": e.get("year"), "text": e.get("text", "")[:90]} for e in events
+            'events': [
+                {'year': e.get('year'), 'text': e.get('text', '')[:90]}
+                for e in events
             ]
         }
-        _today_cache = {"date": today, "data": result}
+        _today_cache = {'date': today, 'data': result}
         return jsonify(result)
     except Exception as e:
-        return jsonify({"events": [], "error": str(e)}), 500
+        return jsonify({'events': [], 'error': str(e)}), 500
 
 
 # ── Prokerala OAuth2 token cache ─────────────────────────────────────────
